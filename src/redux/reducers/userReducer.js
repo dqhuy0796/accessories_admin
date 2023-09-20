@@ -2,8 +2,7 @@ import { UserActionTypes } from '../constants';
 
 const initState = {
     isLogged: false,
-    user: {},
-    darkmode: false,
+    data: {},
     accessToken: null,
     refreshToken: null,
 };
@@ -20,8 +19,7 @@ const userReducer = (state = initState, action) => {
         case UserActionTypes.logout:
             return {
                 isLogged: false,
-                user: {},
-                darkmode: false,
+                data: {},
                 accessToken: null,
                 refreshToken: null,
             };
@@ -32,11 +30,11 @@ const userReducer = (state = initState, action) => {
                 ...action.payload,
             };
 
-        case UserActionTypes.updateProfile:
+        case UserActionTypes.ProfileUpdate:
             return {
                 ...state,
-                user: {
-                    ...state.user,
+                data: {
+                    ...state.data,
                     ...action.payload,
                 },
             };

@@ -1,39 +1,97 @@
 import { productService } from '@/services';
 import { CustomProductCard } from '@/widgets/cards';
-import { CustomConfirmDialog } from '@/widgets/partials';
-import CustomFilterMenu from '@/widgets/partials/custom-filter-menu';
-import { CheckCircleIcon, ExclamationCircleIcon, FunnelIcon, PlusIcon } from '@heroicons/react/24/solid';
-import { Button, Card, CardBody, Input, Typography } from '@material-tailwind/react';
+import { CustomConfirmDialog, CustomPagination } from '@/widgets/partials';
+import {
+    ArrowsUpDownIcon,
+    ChevronDownIcon,
+    FunnelIcon,
+    MagnifyingGlassIcon,
+    PlusIcon,
+} from '@heroicons/react/24/solid';
+import {
+    Button,
+    Card,
+    CardBody,
+    CardFooter,
+    Checkbox,
+    Collapse,
+    Input,
+    Menu,
+    MenuHandler,
+    MenuItem,
+    MenuList,
+    Typography,
+} from '@material-tailwind/react';
+import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export function Products() {
     const [products, setProducts] = useState([]);
     const [isLoading, setLoading] = useState(false);
-    const [isOpenFilterMenu, setOpenFilterMenu] = useState(false);
+    const [openFilter, setOpenFilter] = useState(false);
+    const [openSorter, setOpenSorter] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalResults, setTotalResults] = useState(0);
+    const [filterMenu, setFilterMenu] = useState([]);
+    const [filteredCategories, setFilteredCategories] = useState([]);
     const [dialog, setDialog] = useState({
         title: 'Xóa sản phẩm',
         text: 'Xác nhận xóa sản phẩm?',
     });
+    let [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
 
-    const handleGetProducts = async () => {
+    const handleGetProducts = async (categories, page) => {
         setLoading(true);
-        const response = await productService.getProductsService();
+        const response = await productService.getProductsService(categories, page);
         if (response && response.code === 'SUCCESS') {
-            setProducts(response.result);
+            const { page, total_pages, total_results, result } = response;
+            setProducts(result);
+            setCurrentPage(Number(page));
+            setTotalPages(Number(total_pages));
+            setTotalResults(Number(total_results));
+        }
+        setLoading(false);
+    };
+
+    const handleGetProductsCount = async () => {
+        setLoading(true);
+        const response = await productService.getProductsCountService();
+        if (response && response.code === 'SUCCESS') {
+            setFilterMenu(response.result);
         }
         setLoading(false);
     };
 
     useEffect(() => {
-        handleGetProducts();
+        handleGetProductsCount();
+
+        const title = document.title;
+
+        document.title = 'Quản lý sản phẩm';
+
+        return () => (document.title = title);
     }, []);
 
-    const handleToggleFilterMenu = () => {
-        setOpenFilterMenu((prevIsOpen) => !prevIsOpen);
-    };
+    useEffect(() => {
+        setSearchParams(`category=${filteredCategories.join('+') || 'all'}`);
 
+        const encodedCategories = encodeURIComponent(filteredCategories.join(',') || 'all');
+
+        handleGetProducts(encodedCategories, currentPage);
+    }, [currentPage, filteredCategories]);
+
+    const handleToggleFilter = () => {
+        setOpenFilter((prevOpen) => !prevOpen);
+    };
+    const handleToggleSorter = () => {
+        setOpenSorter((prevOpen) => !prevOpen);
+    };
+    const handleOnChangePagination = (value) => {
+        setCurrentPage(value);
+    };
     const handleRedirectToCreate = () => {
         navigate(`/dashboard/product/create`);
     };
@@ -42,6 +100,40 @@ export function Products() {
     };
     const handleRedirectToUpdate = (id) => {
         navigate(`/dashboard/product/update/${id}`);
+    };
+    const updateUiProducts = (id) => {
+        const newProducts = products.filter((item) => item.id !== id);
+        setProducts(newProducts);
+    };
+
+    /** FILTER */
+
+    const handleOnFilterCategories = (value) => {
+        const isValueSelected = filteredCategories.includes(value);
+        const newOption = isValueSelected
+            ? filteredCategories.filter((item) => item !== value)
+            : [...filteredCategories, value];
+        setFilteredCategories(newOption);
+    };
+
+    const handleResetFilteredCategories = () => {
+        setFilteredCategories([]);
+    };
+
+    /** SORTER */
+
+    const handleSortByPrice = (type) => {
+        setLoading(true);
+        if (type === 'desc') {
+            const descSortedProducts = [...products].sort((a, b) => b.price - a.price);
+            setProducts(descSortedProducts);
+        } else if (type === 'asc') {
+            const ascSortedProducts = [...products].sort((a, b) => a.price - b.price);
+            setProducts(ascSortedProducts);
+        }
+        setTimeout(() => {
+            setLoading(false);
+        }, 1000);
     };
 
     /** DATA SUBMIT HANDLER */
@@ -65,40 +157,42 @@ export function Products() {
                 setDialog((prevState) => ({
                     ...prevState,
                     status: 'SUCCESS',
-                    text: `Đã xóa sản phẩm "${data.phone_number}".`,
-                    icon: <CheckCircleIcon className="h-8 w-8 text-green-600" />,
-                    onConfirm: handleCloseDialog,
+                    text: `Đã xóa "${data.name}".`,
+                    btnCancel: 'Thoát',
+                    btnDelete: 'Xác nhận',
+                    onDelete: handleCloseDialog,
                 }));
-                handleGetUsers();
+                updateUiProducts(data.id);
             } else {
                 setDialog((prevState) => ({
                     ...prevState,
-                    status: 'FAILURE',
+                    status: 'ERROR',
+                    btnDelete: 'Thử lại',
                     text: 'Xóa sản phẩm không thành công!',
-                    onConfirm: handleCloseDialog,
-                    icon: <ExclamationCircleIcon className="h-8 w-8 text-red-500" />,
                 }));
             }
         } catch (error) {
             setDialog((prevState) => ({
                 ...prevState,
-                status: 'FAILURE',
+                status: 'ERROR',
+                btnConfirm: 'Thử lại',
                 text: error?.message || error || 'Xóa sản phẩm không thành công!',
-                onConfirm: handleCloseDialog,
-                icon: <ExclamationCircleIcon className="h-8 w-8 text-red-500" />,
             }));
         }
     };
 
-    const handleOpenDialog = (data) => {
+    const handleOpenDeleteDialog = (data) => {
         setDialog((prevState) => ({
             ...prevState,
             open: true,
-            btnCancel: 'Hủy',
-            btnConfirm: 'Xác nhận',
+            status: 'WARNING',
+            title: 'Xóa sản phẩm',
+            text: 'Xác nhận xóa sản phẩm này?',
             handler: handleCloseDialog,
+            btnCancel: 'Hủy',
             onCancel: handleCloseDialog,
-            onConfirm: () => handleDeleteProduct(data),
+            btnDelete: 'Xoá',
+            onDelete: () => handleDeleteProduct(data),
         }));
     };
 
@@ -114,60 +208,201 @@ export function Products() {
             <Typography variant="h4">Danh sách sản phẩm</Typography>
             <Card>
                 <CardBody className="p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div className="relative flex w-full max-w-[24rem]">
-                            <Input type="search" label="Tìm kiếm" className="" />
+                    <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+                        <div className="lg:col-span-2">
+                            <Input
+                                size="md"
+                                label="Tìm kiếm"
+                                color="blue-gray"
+                                icon={<MagnifyingGlassIcon className="h-4 w-4" />}
+                            />
                         </div>
 
-                        <div className="relative flex w-full items-center justify-between gap-3 md:w-max">
+                        <div className="flex flex-wrap items-center justify-end gap-3 sm:flex-nowrap md:col-span-2 lg:col-span-3">
                             <Button
-                                size="sm"
+                                size="md"
                                 color="blue"
                                 variant="gradient"
-                                className="flex items-center gap-1 pl-4"
+                                className="flex w-full items-center justify-center gap-1 pl-4 sm:w-max"
                                 onClick={handleRedirectToCreate}
                             >
-                                <PlusIcon className="h-5 w-5 text-white" />
+                                <PlusIcon className="h-4 w-4" />
                                 <span>Sản phẩm mới</span>
                             </Button>
 
-                            <div className="relative">
-                                <Button
-                                    size="sm"
-                                    color="blue-gray"
-                                    variant="outlined"
-                                    className="flex items-center gap-1 pl-4 outline-none"
-                                    onClick={handleToggleFilterMenu}
-                                >
-                                    <FunnelIcon className="h-5 w-5 text-blue-gray-500" />
-                                    Bộ lọc
-                                </Button>
+                            <Button
+                                size="md"
+                                color="blue-gray"
+                                variant="outlined"
+                                className="flex w-[calc(50%-6px)] items-center justify-center gap-1 pl-4 sm:w-max"
+                                onClick={handleToggleFilter}
+                            >
+                                <FunnelIcon className="h-4 w-4" />
+                                Bộ lọc
+                            </Button>
 
-                                <CustomFilterMenu open={isOpenFilterMenu} />
-                            </div>
+                            <Button
+                                size="md"
+                                color="blue-gray"
+                                variant="outlined"
+                                className="flex w-[calc(50%-6px)] items-center justify-center gap-1 pl-4 sm:w-max"
+                                onClick={handleToggleSorter}
+                            >
+                                <ArrowsUpDownIcon className="h-4 w-4" />
+                                Sắp xếp
+                            </Button>
                         </div>
                     </div>
 
+                    <Collapse open={openFilter}>
+                        <div className="mt-4 rounded-lg border border-blue-gray-100 p-4">
+                            <Typography className="ml-2 mb-2 text-sm font-semibold">
+                                Danh mục
+                            </Typography>
+                            <div className="grid grid-cols-2 gap-x-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                                <Checkbox
+                                    color="blue"
+                                    value={'all'}
+                                    label={
+                                        <span className="text-xs font-medium">
+                                            {`Tất cả (${filterMenu.reduce((sum, product) => {
+                                                return sum + Number(product.product_count);
+                                            }, 0)})`}
+                                        </span>
+                                    }
+                                    checked={filteredCategories.length === 0 ? true : false}
+                                    onChange={handleResetFilteredCategories}
+                                />
+                                {filterMenu &&
+                                    filterMenu.length > 0 &&
+                                    filterMenu.map((item) => (
+                                        <Checkbox
+                                            color="blue"
+                                            key={item.id}
+                                            value={item.slug}
+                                            label={
+                                                <span className="text-xs font-medium line-clamp-1">
+                                                    {`${item.name} (${item.product_count})`}
+                                                </span>
+                                            }
+                                            checked={
+                                                filteredCategories.includes(item.slug)
+                                                    ? true
+                                                    : false
+                                            }
+                                            onChange={() => handleOnFilterCategories(item.slug)}
+                                        />
+                                    ))}
+                            </div>
+                        </div>
+                    </Collapse>
+
+                    <Collapse open={openSorter}>
+                        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                            <Menu>
+                                <MenuHandler>
+                                    <Button
+                                        size="sm"
+                                        color="blue-gray"
+                                        variant="outlined"
+                                        className="flex items-center justify-center gap-2"
+                                    >
+                                        <ArrowsUpDownIcon className="h-4 w-4" />
+                                        <span>tên</span>
+                                    </Button>
+                                </MenuHandler>
+                                <MenuList>
+                                    <MenuItem>a-z A-Z</MenuItem>
+                                    <MenuItem>z-a Z-A</MenuItem>
+                                </MenuList>
+                            </Menu>
+                            <Menu>
+                                <MenuHandler>
+                                    <Button
+                                        size="sm"
+                                        color="blue-gray"
+                                        variant="outlined"
+                                        className="flex items-center justify-center gap-2"
+                                    >
+                                        <ArrowsUpDownIcon className="h-4 w-4" />
+                                        <span>giá</span>
+                                    </Button>
+                                </MenuHandler>
+                                <MenuList>
+                                    <MenuItem onClick={() => handleSortByPrice('asc')}>
+                                        Thấp dến cao
+                                    </MenuItem>
+                                    <MenuItem onClick={() => handleSortByPrice('desc')}>
+                                        Cao đến thấp
+                                    </MenuItem>
+                                </MenuList>
+                            </Menu>
+                            <Menu>
+                                <MenuHandler>
+                                    <Button
+                                        size="sm"
+                                        color="blue-gray"
+                                        variant="outlined"
+                                        className="flex items-center justify-center gap-2"
+                                    >
+                                        <ArrowsUpDownIcon className="h-4 w-4" />
+                                        <span>đã bán</span>
+                                    </Button>
+                                </MenuHandler>
+                                <MenuList>
+                                    <MenuItem>Bán nhiều</MenuItem>
+                                    <MenuItem>Bán ít</MenuItem>
+                                </MenuList>
+                            </Menu>
+                        </div>
+                    </Collapse>
+
                     <div className="mt-4 grid gap-3">
                         {isLoading ? (
-                            [1, 2, 3, 4, 5, 6].map((element) => <CustomProductCard key={element} />)
-                        ) : products && products.length > 0 ? (
+                            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((element) => (
+                                <CustomProductCard key={element} />
+                            ))
+                        ) : !_.isEmpty(products) ? (
                             products.map((item, index) => (
                                 <CustomProductCard
                                     key={index}
                                     data={item}
                                     onPreview={() => handleRedirectToPreview(item.id)}
                                     onUpdate={() => handleRedirectToUpdate(item.id)}
-                                    onDelete={() => handleOpenDialog(item)}
+                                    onDelete={() => handleOpenDeleteDialog(item)}
                                 />
                             ))
                         ) : (
-                            <Typography className="text-ellipsis whitespace-nowrap py-3 px-5">
-                                Không có dữ liệu sản phẩm nào
+                            <Typography className="text-ellipsis whitespace-nowrap px-2">
+                                Không có dữ liệu sản phẩm phù hợp
                             </Typography>
                         )}
                     </div>
                 </CardBody>
+
+                <CardFooter className="pt-0 pb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-4 md:flex-nowrap">
+                        <Typography color="gray" className="flex gap-1 text-sm">
+                            <strong className="font-semibold text-gray-900">
+                                {currentPage * 12 - 11}
+                            </strong>
+                            <span>-</span>
+                            <strong className="font-semibold text-gray-900">
+                                {currentPage * 12 < totalResults ? currentPage * 12 : totalResults}
+                            </strong>
+                            <span>of</span>
+                            <strong className="font-semibold text-gray-900">
+                                {totalResults * 1}
+                            </strong>
+                        </Typography>
+
+                        <CustomPagination
+                            current={currentPage}
+                            total={totalPages}
+                            onPagination={handleOnChangePagination}
+                        />
+                    </div>
+                </CardFooter>
             </Card>
 
             <CustomConfirmDialog {...dialog} />
@@ -176,3 +411,9 @@ export function Products() {
 }
 
 export default Products;
+
+const AccordionOpenButton = ({ id, open }) => (
+    <ChevronDownIcon
+        className={`h-4 w-4 transition-all ${open === id ? 'rotate-180' : 'rotate-0'}`}
+    />
+);

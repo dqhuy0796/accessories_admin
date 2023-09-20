@@ -1,28 +1,24 @@
-import { SignIn, SignUp } from '@/pages/auth';
 import {
     Home,
-    Notifications,
     ProductCreate,
     ProductDetails,
     Products,
     Profile,
     Tables,
-    Users,
     UserCreate,
     UserDetails,
     UserUpdate,
+    Users
 } from '@/pages/dashboard';
 import {
     ArchiveBoxIcon,
-    ArrowRightOnRectangleIcon,
-    BellIcon,
     HomeIcon,
     TableCellsIcon,
     UserCircleIcon,
-    UserIcon,
-    UserPlusIcon,
+    UserIcon
 } from '@heroicons/react/24/solid';
-import ProductUpdate from './pages/dashboard/product/product-update';
+import Login from './pages/auth/Login';
+import ProfileUpdate from './pages/dashboard/profile/update-profile';
 
 const icon = {
     className: 'w-5 h-5 text-inherit',
@@ -43,6 +39,16 @@ export const routes = [
                 name: 'trang cá nhân',
                 path: '/profile',
                 element: <Profile />,
+                routes: [
+                    {
+                        path: '/profile',
+                        element: <Profile />,
+                    },
+                    {
+                        path: '/profile/update',
+                        element: <ProfileUpdate />,
+                    },
+                ],
             },
             {
                 icon: <TableCellsIcon {...icon} />,
@@ -55,24 +61,24 @@ export const routes = [
                 name: 'Tài khoản',
                 path: '/user',
                 element: <Users />,
-            },
-            {
-                hideInMenu: true,
-                icon: <TableCellsIcon {...icon} />,
-                path: '/user/create',
-                element: <UserCreate />,
-            },
-            {
-                hideInMenu: true,
-                icon: <TableCellsIcon {...icon} />,
-                path: '/user/detail/:id',
-                element: <UserDetails />,
-            },
-            {
-                hideInMenu: true,
-                icon: <TableCellsIcon {...icon} />,
-                path: '/user/update/:id',
-                element: <UserUpdate />,
+                routes: [
+                    {
+                        path: '/user',
+                        element: <Users />,
+                    },
+                    {
+                        path: '/user/create',
+                        element: <UserCreate />,
+                    },
+                    {
+                        path: '/user/detail/:id',
+                        element: <UserDetails />,
+                    },
+                    {
+                        path: '/user/update/:id',
+                        element: <UserUpdate />,
+                    },
+                ],
             },
             {
                 icon: <TableCellsIcon {...icon} />,
@@ -85,48 +91,33 @@ export const routes = [
                 name: 'sản phẩm',
                 path: '/product',
                 element: <Products />,
-            },
-            {
-                hideInMenu: true,
-                icon: <TableCellsIcon {...icon} />,
-                path: '/product/create',
-                element: <ProductCreate />,
-            },
-            {
-                hideInMenu: true,
-                icon: <TableCellsIcon {...icon} />,
-                path: '/product/detail/:id',
-                element: <ProductDetails />,
-            },
-            {
-                hideInMenu: true,
-                icon: <TableCellsIcon {...icon} />,
-                path: '/product/update/:id',
-                element: <ProductUpdate />,
-            },
-            {
-                icon: <BellIcon {...icon} />,
-                name: 'notifactions',
-                path: '/notifactions',
-                element: <Notifications />,
+                routes: [
+                    {
+                        path: '/product',
+                        element: <Products />,
+                    },
+                    {
+                        path: '/product/create',
+                        element: <ProductCreate />,
+                    },
+                    {
+                        path: '/product/detail/:id',
+                        element: <ProductDetails />,
+                    },
+                    {
+                        path: '/product/update/:id',
+                        element: <ProductCreate />,
+                    },
+                ],
             },
         ],
     },
     {
-        title: 'auth pages',
         layout: 'auth',
         pages: [
             {
-                icon: <ArrowRightOnRectangleIcon {...icon} />,
-                name: 'sign in',
                 path: '/login',
-                element: <SignIn />,
-            },
-            {
-                icon: <UserPlusIcon {...icon} />,
-                name: 'sign up',
-                path: '/register',
-                element: <SignUp />,
+                element: <Login />,
             },
         ],
     },

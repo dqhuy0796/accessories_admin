@@ -2,7 +2,7 @@ import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Spinner } from '@material-tailwind/react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 
 export function CustomSelectOption({ type, variant, value, options, onSelect, disabled, readonly, loading }) {
     const [isOpen, setOpen] = useState(false);
@@ -19,7 +19,7 @@ export function CustomSelectOption({ type, variant, value, options, onSelect, di
                 const { top } = selectionRef.current.getBoundingClientRect();
                 posY = window.scrollY + top;
                 const distance = window.innerHeight - posY;
-                if (distance < 400) {
+                if (distance < 240) {
                     setDropdownable(false);
                 }
             }
@@ -86,7 +86,7 @@ export function CustomSelectOption({ type, variant, value, options, onSelect, di
                     </label>
 
                     <div
-                        className={`absolute top-1/2 right-2 h-5 w-5 grid place-items-center -translate-y-1/2 pt-px transition-all duration-300 ${
+                        className={`absolute top-1/2 right-2 grid h-5 w-5 -translate-y-1/2 place-items-center pt-px transition-all duration-300 ${
                             isOpen ? '-rotate-180' : 'rotate-0'
                         }`}
                     >
@@ -97,7 +97,7 @@ export function CustomSelectOption({ type, variant, value, options, onSelect, di
                 {!disabled && (
                     <div
                         ref={selectionRef}
-                        className={`absolute left-0 right-0 z-10 overflow-hidden rounded-md bg-white transition-all duration-300 focus:outline-none  
+                        className={`absolute left-0 right-0 z-50 overflow-hidden rounded-md bg-white transition-all duration-300 focus:outline-none  
                         ${dropdownable ? 'top-[calc(100%+5px)]' : 'bottom-[calc(100%+5px)]'} ${
                             isOpen
                                 ? 'max-h-96 border border-blue-gray-100 shadow-lg shadow-blue-gray-500/10'
@@ -160,4 +160,4 @@ CustomSelectOption.propTypes = {
     loading: PropTypes.bool,
 };
 
-export default CustomSelectOption;
+export default memo(CustomSelectOption);

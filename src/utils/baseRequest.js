@@ -1,7 +1,8 @@
 import axios from 'axios';
+import instance from './instance';
 
 const request = axios.create({
-    baseURL: 'http://localhost:8000/api/',
+    baseURL: import.meta.env.VITE_DEVELOPMENT_SERVER_URL,
 });
 
 export const getApi = async (url, payload, token) => {
@@ -11,7 +12,7 @@ export const getApi = async (url, payload, token) => {
     if (token) {
         config.headers = { Authorization: `Bearer ${token}` };
     }
-    const response = await request.get(url, config);
+    const response = await instance.get(url, config);
     return response.data;
 };
 
@@ -20,7 +21,7 @@ export const postApi = async (url, payload, token) => {
     if (token) {
         config.headers = { Authorization: `Bearer ${token}` };
     }
-    const response = await request.post(url, payload, config);
+    const response = await instance.post(url, payload, config);
     return response.data;
 };
 
@@ -29,7 +30,7 @@ export const putApi = async (url, payload, token) => {
     if (token) {
         config.headers = { Authorization: `Bearer ${token}` };
     }
-    const response = await request.put(url, payload, config);
+    const response = await instance.put(url, payload, config);
     return response.data;
 };
 
@@ -40,8 +41,8 @@ export const deleteApi = async (url, payload, token) => {
     if (token) {
         config.headers = { Authorization: `Bearer ${token}` };
     }
-    const response = await request.delete(url, config);
+    const response = await instance.delete(url, config);
     return response.data;
 };
 
-export default request;
+export default instance;

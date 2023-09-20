@@ -1,10 +1,10 @@
-import { userService } from '~/services';
+import { userService } from '@/services';
 import { UserActionTypes } from '../constants';
 
 export const login = (data) => ({
     type: UserActionTypes.login,
     payload: {
-        user: data.user,
+        data: data.user,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
     },
@@ -14,11 +14,11 @@ export const logout = () => ({
     type: UserActionTypes.logout,
 });
 
-export const mapTokens = (newAccessToken, newRefreshToken) => ({
+export const mapTokens = (accessToken, refreshToken) => ({
     type: UserActionTypes.refresh,
     payload: {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
+        accessToken,
+        refreshToken,
     },
 });
 
@@ -29,7 +29,7 @@ export const refreshTokens = () => async (dispatch) => {
 
 // PROFILE
 
-export const updateProfile = (newProfile) => ({
-    type: UserActionTypes.updateProfile,
+export const ProfileUpdate = (newProfile) => ({
+    type: UserActionTypes.ProfileUpdate,
     payload: newProfile,
 });

@@ -32,11 +32,15 @@ export function DashboardNavbar({ brandImg, brandName }) {
             blurred={false}
             fullWidth
         >
-            <div className="flex items-center justify-between md:justify-end w-full h-full">
+            <div className="flex h-full w-full items-center justify-between md:justify-end">
                 <div className="mr-auto p-4 md:mr-0 md:w-80">
                     <Input label="Type here" />
                 </div>
-                <IconButton variant="text" color="blue-gray" onClick={() => setOpenConfigurator(dispatch, true)}>
+                <IconButton
+                    variant="text"
+                    color="blue-gray"
+                    onClick={() => setOpenConfigurator(dispatch, true)}
+                >
                     <Cog6ToothIcon className="h-5 w-5 text-blue-gray-500" />
                 </IconButton>
                 <Menu>
@@ -54,7 +58,11 @@ export function DashboardNavbar({ brandImg, brandName }) {
                                 variant="circular"
                             />
                             <div>
-                                <Typography variant="small" color="blue-gray" className="mb-1 font-normal">
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="mb-1 font-normal"
+                                >
                                     <strong>New message</strong> from Laur
                                 </Typography>
                                 <Typography
@@ -74,7 +82,11 @@ export function DashboardNavbar({ brandImg, brandName }) {
                                 variant="circular"
                             />
                             <div>
-                                <Typography variant="small" color="blue-gray" className="mb-1 font-normal">
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="mb-1 font-normal"
+                                >
                                     <strong>New album</strong> by Travis Scott
                                 </Typography>
                                 <Typography
@@ -91,7 +103,11 @@ export function DashboardNavbar({ brandImg, brandName }) {
                                 <CreditCardIcon className="h-4 w-4 text-white" />
                             </div>
                             <div>
-                                <Typography variant="small" color="blue-gray" className="mb-1 font-normal">
+                                <Typography
+                                    variant="small"
+                                    color="blue-gray"
+                                    className="mb-1 font-normal"
+                                >
                                     Payment successfully completed
                                 </Typography>
                                 <Typography
@@ -122,7 +138,5 @@ DashboardNavbar.defaultProps = {
     brandImg: '/img/logo-ct.png',
     brandName: 'Accessories Ahihi',
 };
-
-DashboardNavbar.displayName = '/src/widgets/layout/navbar.jsx';
 
 export default DashboardNavbar;

@@ -29,24 +29,40 @@ export const getMaterialsService = async () => {
     }
 };
 
-export const createProductService = async (data) => {
-    const path = 'product/create';
+export const getProductsCountService = async () => {
+    const path = 'product/count';
 
-    const payload = data;
+    const payload = {};
 
     try {
-        const result = await request.postApi(path, payload);
+        const result = await request.getApi(path, payload);
         return result;
     } catch (error) {
         console.log(error);
     }
 };
 
-export const getProductsService = async (category_id) => {
+export const createProductService = async (data) => {
+    const path = 'product/create';
+
+    const accessToken = store.getState().user.accessToken;
+
+    const payload = data;
+
+    try {
+        const result = await request.postApi(path, payload, accessToken);
+        return result;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const getProductsService = async (categories, page) => {
     const path = 'product/get';
 
     const payload = {
-        category_id,
+        categories,
+        page,
     };
 
     try {
@@ -72,8 +88,8 @@ export const getProductByIdService = async (product_id) => {
     }
 };
 
-export const updateUserService = async (data) => {
-    const path = 'user/update';
+export const updateProductService = async (data) => {
+    const path = 'product/update';
 
     const payload = data;
 
@@ -91,9 +107,8 @@ export const deleteProductService = async (data) => {
     const payload = data;
 
     try {
-        // const result = await request.deleteApi(path, payload);
-        // return result;
-        console.log(data);
+        const result = await request.deleteApi(path, payload);
+        return result;
     } catch (error) {
         console.log(error);
     }

@@ -1,99 +1,115 @@
-import { productService } from '@/services';
-import { CustomConfirmDialog, CustomImageUpload, CustomSelectOption } from '@/widgets/partials';
-import { CheckCircleIcon, ExclamationCircleIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { Button, Card, CardBody, Input, Textarea, Typography } from '@material-tailwind/react';
+import { imageService, productService } from '@/services';
+import { CustomConfirmDialog, CustomCrudGroupButtons, CustomImageUpload } from '@/widgets/partials';
+import {
+    Card,
+    CardBody,
+    CardFooter,
+    Tab,
+    TabPanel,
+    Tabs,
+    TabsBody,
+    TabsHeader,
+    Typography,
+} from '@material-tailwind/react';
 import _ from 'lodash';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { memo, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import ProductForm from './product-form';
 
 export function ProductCreate() {
-    const [error, setError] = useState({ category: false, material: false });
-    const [isLoading, setLoading] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const [materials, setMaterials] = useState([]);
+    const [activeTab, setActiveTab] = useState('general');
+    const [updatable, setUpdatable] = useState(false);
     const [productData, setProductData] = useState({});
-    const [dialog, setDialog] = useState({
-        title: 'Tạo mới sản phẩm',
-        text: 'Xác nhận tạo mới sản phẩm?',
-    });
+    const [defaultData, setDefaultData] = useState({});
+    const [images, setImages] = useState([]);
+    const [dialog, setDialog] = useState({});
+    const { id } = useParams();
     const navigate = useNavigate();
-
-    const handleGetCategories = async () => {
-        console.log('handleGetCategories');
-        setLoading(true);
-        const response = await productService.getCategoriesService();
-        if (response && response.code === 'SUCCESS') {
-            setCategories(response.result);
-            setError((prevState) => ({
-                ...prevState,
-                category: false,
-            }));
-        } else {
-            setError((prevState) => ({
-                ...prevState,
-                category: true,
-            }));
-        }
-        setLoading(false);
-    };
-
-    const handleGetMaterials = async () => {
-        setLoading(true);
-        const response = await productService.getMaterialsService();
-        if (response) {
-            setMaterials(response.result);
-            setError((prevState) => ({
-                ...prevState,
-                material: false,
-            }));
-        } else {
-            setError((prevState) => ({
-                ...prevState,
-                material: true,
-            }));
-        }
-        setLoading(false);
-    };
+    const tabsMenu = [
+        {
+            value: 'general',
+            title: 'Tổng quan',
+        },
+        {
+            value: 'images',
+            title: 'Hình ảnh',
+        },
+        {
+            value: 'variants',
+            title: 'Tùy chọn',
+        },
+    ];
 
     useEffect(() => {
-        handleGetCategories();
-        handleGetMaterials();
+        const handleGetProductById = async (id) => {
+            const response = await productService.getProductByIdService(id);
+
+            if (response && response.code === 'SUCCESS') {
+                setImages(response.result.images);
+                delete response.result.images;
+                setDefaultData(response.result);
+                setProductData(response.result);
+            }
+        };
+        if (id) {
+            handleGetProductById(id);
+        }
+    }, [id]);
+
+    useEffect(() => {
+        if (_.isEqual(productData, defaultData)) {
+            setUpdatable(false);
+        } else {
+            setUpdatable(true);
+        }
+
+        return () => setUpdatable(false);
+    }, [productData]);
+
+    useEffect(() => {
+        const handleBeforeUnload = async (event) => {
+            event.preventDefault();
+            event.returnValue = '';
+            await handleCloudinaryUploadRollback(images);
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
     }, []);
 
-    const handleOnChangeInput = (key, value) => {
-        setProductData((prevState) => ({
-            ...prevState,
-            [key]: value,
-        }));
-    };
+    const isCreatable = () => {
+        const {
+            name,
+            slug,
+            price,
+            brand,
+            category,
+            material,
+            color,
+            quantity,
+            feature_image_url,
+            description,
+        } = productData;
 
-    const handleOnSelectMaterial = (value) => {
-        const result = materials.find((item) => item.name === value);
-        if (result && result.name !== productData.material) {
-            setProductData((prevState) => ({
-                ...prevState,
-                material: result.name,
-                material_id: result.id,
-            }));
+        if (
+            !_.isEmpty(name) ||
+            !_.isEmpty(slug) ||
+            !_.isEmpty(price) ||
+            !_.isEmpty(brand) ||
+            !_.isEmpty(category) ||
+            !_.isEmpty(material) ||
+            !_.isEmpty(color) ||
+            !_.isEmpty(quantity) ||
+            !_.isEmpty(feature_image_url) ||
+            !_.isEmpty(description) ||
+            !_.isEmpty(images)
+        ) {
+            return true;
         }
-    };
-
-    const handleOnSelectCategory = (value) => {
-        const result = categories.find((item) => item.name === value);
-        if (result && result.name !== productData.category) {
-            setProductData((prevState) => ({
-                ...prevState,
-                category: result.name,
-                category_id: result.id,
-            }));
-        }
-    };
-
-    const handleOnChangeImages = (values) => {
-        setProductData((prevState) => ({
-            ...prevState,
-            images: values,
-        }));
+        return false;
     };
 
     /** DATA SUBMIT HANDLER */
@@ -110,7 +126,7 @@ export function ProductCreate() {
                 setTimeout(async () => {
                     const result = await productService.createProductService(data);
                     resolve(result);
-                }, 2000);
+                }, 1000);
             });
 
             if (response && response.code === 'SUCCESS') {
@@ -120,46 +136,247 @@ export function ProductCreate() {
                     ...prevState,
                     status: 'SUCCESS',
                     text: `Tạo mới sản phẩm thành công!`,
-                    icon: <CheckCircleIcon className="h-8 w-8 text-green-600" />,
                     btnCancel: 'Tạo thêm sản phẩm',
                     btnConfirm: 'Đến trang quản lý',
-                    onConfirm: handleRedirect,
+                    onConfirm: handleRedirectToManagerPage,
                 }));
             } else {
                 setDialog((prevState) => ({
                     ...prevState,
-                    status: 'FAILURE',
+                    status: 'ERROR',
                     text: 'Tạo mới sản phẩm không thành công!',
                     btnConfirm: 'Thử lại',
-                    icon: <ExclamationCircleIcon className="h-8 w-8 text-red-500" />,
                 }));
             }
         } catch (error) {
             setDialog((prevState) => ({
                 ...prevState,
-                status: 'FAILURE',
+                status: 'ERROR',
                 btnConfirm: 'Thử lại',
                 text: error?.message || error || 'Tạo mới sản phẩm không thành công!',
-                icon: <ExclamationCircleIcon className="h-8 w-8 text-red-500" />,
             }));
         }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        handleCreateProduct(productData);
-        console.log(productData);
+    const handleUpdateProduct = async (data) => {
+        try {
+            setDialog((prevState) => ({
+                ...prevState,
+                status: 'PENDING',
+                text: 'Đang xử lý thông tin...',
+            }));
+
+            const response = await new Promise((resolve) => {
+                setTimeout(async () => {
+                    const result = await productService.updateProductService(data);
+                    resolve(result);
+                }, 1000);
+            });
+
+            if (response && response.code === 'SUCCESS') {
+                setDialog((prevState) => ({
+                    ...prevState,
+                    status: 'SUCCESS',
+                    text: `Cập nhật thông tin thành công!`,
+                }));
+
+                let countdown = 50;
+                const countdownInterval = setInterval(() => {
+                    setDialog((prevState) => ({
+                        ...prevState,
+                        countdown: countdown / 10,
+                    }));
+                    countdown = countdown - 1;
+                    if (countdown === 0) {
+                        clearInterval(countdownInterval);
+                        navigate(-1);
+                    }
+                }, 100);
+            } else {
+                setDialog((prevState) => ({
+                    ...prevState,
+                    status: 'ERROR',
+                    btnConfirm: 'Thử lại',
+                    text: 'Cập nhật thông tin không thành công!',
+                }));
+            }
+        } catch (error) {
+            setDialog((prevState) => ({
+                ...prevState,
+                status: 'ERROR',
+                btnConfirm: 'Thử lại',
+                text: error?.message || error || 'Cập nhật thông tin không thành công!',
+            }));
+        }
     };
 
-    const handleOpenDialog = () => {
+    const handleDeleteProduct = async (data) => {
+        try {
+            setDialog((prevState) => ({
+                ...prevState,
+                status: 'PENDING',
+                text: 'Đang xử lý thông tin...',
+            }));
+
+            const response = await new Promise((resolve) => {
+                setTimeout(async () => {
+                    const result = await productService.deleteProductService(data);
+                    resolve(result);
+                }, 2000);
+            });
+
+            if (response && response.code === 'SUCCESS') {
+                setDialog((prevState) => ({
+                    ...prevState,
+                    status: 'SUCCESS',
+                    text: `Đã xóa "${data.name}".`,
+                }));
+
+                let countdown = 50;
+                const countdownInterval = setInterval(() => {
+                    setDialog((prevState) => ({
+                        ...prevState,
+                        countdown: countdown / 10,
+                    }));
+                    countdown = countdown - 1;
+                    if (countdown === 0) {
+                        clearInterval(countdownInterval);
+                        handleRedirectToManagerPage();
+                    }
+                }, 100);
+            } else {
+                setDialog((prevState) => ({
+                    ...prevState,
+                    status: 'ERROR',
+                    btnConfirm: 'Thử lại',
+                    text: 'Xóa sản phẩm không thành công!',
+                }));
+            }
+        } catch (error) {
+            setDialog((prevState) => ({
+                ...prevState,
+                status: 'ERROR',
+                btnConfirm: 'Thử lại',
+                text: error?.message || error || 'Xóa sản phẩm không thành công!',
+            }));
+        }
+    };
+
+    const handleCloudinaryUploadRollback = async (images) => {
+        if (_.isEmpty(images)) {
+            return true;
+        }
+
+        const response = await imageService.rollbackCloudUpload(images);
+
+        if (response && response.code === 'SUCCESS') {
+            return true;
+        }
+
+        return false;
+    };
+
+    /** EVENT HANDLER */
+
+    /** 1. onChange */
+    
+    const genarateSlug = (str) => {
+        return str
+            .toLowerCase()
+            .replace(/á|à|ả|ạ|ã|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ/gi, 'a')
+            .replace(/é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ/gi, 'e')
+            .replace(/i|í|ì|ỉ|ĩ|ị/gi, 'i')
+            .replace(/ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ/gi, 'o')
+            .replace(/ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự/gi, 'u')
+            .replace(/ý|ỳ|ỷ|ỹ|ỵ/gi, 'y')
+            .replace(/đ/gi, 'd')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .trim();
+    };
+
+    const handleOnChange = (key, value) => {
+        if (key === 'name') {
+            const slug = genarateSlug(value);
+            setProductData((prevState) => ({
+                ...prevState,
+                name: value,
+                slug: slug,
+            }));
+            return;
+        }
+
+        setProductData((prevState) => ({
+            ...prevState,
+            [key]: value,
+        }));
+    };
+
+    const handleOnChangeImages = (images) => {
+        setImages(images);
+    };
+
+    /** 2. Submit */
+
+    const handleSubmitCreateProduct = (e) => {
+        e.preventDefault();
+        handleCreateProduct({ ...productData, images: images });
+    };
+
+    const handleSubmitUpdateProduct = (e) => {
+        e.preventDefault();
+        handleUpdateProduct({ ...productData, images: images });
+    };
+
+    const handleSubmitDeleteProduct = (e) => {
+        e.preventDefault();
+        handleDeleteProduct(productData);
+    };
+
+    /** 3. Active dialog */
+
+    const handleOpenCreateDialog = () => {
         setDialog((prevState) => ({
             ...prevState,
             open: true,
-            btnCancel: 'Hủy',
-            btnConfirm: 'Xác nhận',
+            status: 'READY',
+            title: 'Tạo mới sản phẩm',
+            text: 'Xác nhận tạo mới sản phẩm?',
             handler: handleCloseDialog,
+            btnCancel: 'Hủy',
             onCancel: handleCloseDialog,
-            onConfirm: handleSubmit,
+            btnConfirm: 'Tạo mới',
+            onConfirm: handleSubmitCreateProduct,
+        }));
+    };
+
+    const handleOpenUpdateDialog = () => {
+        setDialog((prevState) => ({
+            ...prevState,
+            open: true,
+            status: 'READY',
+            title: 'Cập nhật sản phẩm',
+            text: 'Xác nhận cập nhật sản phẩm?',
+            handler: handleCloseDialog,
+            btnCancel: 'Hủy',
+            onCancel: handleCloseDialog,
+            btnConfirm: 'Cập nhật',
+            onConfirm: handleSubmitUpdateProduct,
+        }));
+    };
+
+    const handleOpenDeleteDialog = () => {
+        setDialog((prevState) => ({
+            ...prevState,
+            open: true,
+            status: 'WARNING',
+            title: 'Xóa sản phẩm',
+            text: 'Xác nhận xóa sản phẩm này?',
+            handler: handleCloseDialog,
+            btnCancel: 'Hủy',
+            onCancel: handleCloseDialog,
+            btnDelete: 'Xoá',
+            onDelete: handleSubmitDeleteProduct,
         }));
     };
 
@@ -170,138 +387,117 @@ export function ProductCreate() {
         }));
     };
 
-    const handleRedirect = () => {
+    /** 4. Other */
+
+    const handleRedirectToManagerPage = () => {
         navigate('/dashboard/product');
     };
 
-    const handleResetData = () => {
-        setProductData({});
+    const handleCancel = async () => {
+        const result = await handleCloudinaryUploadRollback(images);
+        if (result) {
+            navigate(-1);
+        }
     };
 
-    /** CONSTANTS */
-
-    const listInput = [
-        {
-            key: 'name',
-            type: 'text',
-            label: 'Tên sản phẩm',
-            required: true,
-            span: 2,
-        },
-        {
-            key: 'price',
-            type: 'number',
-            label: 'Giá sản phẩm (VND)',
-            required: true,
-        },
-        {
-            key: 'brand',
-            type: 'text',
-            label: 'Thương hiệu',
-            required: true,
-        },
-        {
-            key: 'category',
-            type: 'select',
-            label: 'Danh mục',
-            options: categories,
-            onSelect: handleOnSelectCategory,
-            required: true,
-        },
-        {
-            key: 'material',
-            type: 'select',
-            label: 'Chất liệu',
-            options: materials,
-            onSelect: handleOnSelectMaterial,
-            required: true,
-        },
-        {
-            key: 'color',
-            type: 'text',
-            label: 'Màu sắc',
-            required: true,
-        },
-        {
-            key: 'quantity',
-            type: 'number',
-            label: 'Số lượng',
-            required: true,
-        },
-    ];
+    const handleResetData = () => {
+        setActiveTab('general');
+        setProductData({});
+        setImages([]);
+    };
 
     return (
         <div className="my-10 flex flex-col gap-12">
-            <Typography variant="h4">Thêm sảm phẩm mới</Typography>
+            <Typography variant="h4">
+                {id ? 'Cập nhật thông tin sản phẩm' : 'Thêm sản phẩm mới'}
+            </Typography>
 
             <Card>
                 <CardBody className="p-4">
-                    <div className="mb-4 grid gap-4">
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {listInput.map((item) =>
-                                item.type === 'select' ? (
-                                    <div key={item.key} className={item.span ? `sm:col-span-2` : null}>
-                                        <CustomSelectOption
-                                            options={item.options}
-                                            variant={{
-                                                key: item.key,
-                                                label: item.label,
-                                                required: item?.required || false,
-                                            }}
-                                            value={productData[item.key] || ''}
-                                            loading={isLoading && _.isEmpty(item.options)}
-                                            onSelect={item.onSelect}
-                                        />
-                                    </div>
-                                ) : (
-                                    <div key={item.key} className={item.span ? `sm:col-span-2` : null}>
-                                        <Input
-                                            color="blue"
-                                            size="lg"
-                                            type={item.type}
-                                            label={item.label}
-                                            value={productData[item.key] || ''}
-                                            required={item?.required || false}
-                                            onChange={(e) => handleOnChangeInput(item.key, e.target.value)}
-                                        />
-                                    </div>
-                                ),
-                            )}
-                        </div>
-
-                        <Textarea
-                            color="blue"
-                            resize={true}
-                            label="Mô tả sản phẩm"
-                            value={productData.description || ''}
-                            required={true}
-                            onChange={(e) => handleOnChangeInput('description', e.target.value)}
-                        />
-
-                        <CustomImageUpload images={productData?.images} onChange={handleOnChangeImages} />
-                    </div>
-
-                    <div className="flex w-full flex-wrap items-center gap-4 md:w-fit md:flex-nowrap">
-                        <Button
-                            color="blue"
-                            variant="gradient"
-                            className="flex w-full items-center justify-center gap-3 pl-4 md:w-fit"
-                            type="submit"
-                            onClick={handleOpenDialog}
+                    <Tabs value={activeTab}>
+                        <TabsHeader
+                            className="rounded-none border-b border-blue-gray-100 bg-transparent p-0 lg:justify-start"
+                            indicatorProps={{
+                                className:
+                                    'bg-transparent border-b-2 border-gray-900 shadow-none rounded-none',
+                            }}
                         >
-                            <PlusIcon className="h-4 w-4" />
-                            <span className="relative top-px text-ellipsis whitespace-nowrap">Tạo sản phẩm mới</span>
-                        </Button>
-                        <Button
-                            color="red"
-                            variant="gradient"
-                            className="flex w-full items-center justify-center gap-3 pl-4 md:w-fit"
-                        >
-                            <XMarkIcon className="h-4 w-4" />
-                            <span className="relative top-px text-ellipsis whitespace-nowrap">Hủy bỏ</span>
-                        </Button>
-                    </div>
+                            {tabsMenu.map(({ value, title }) => (
+                                <Tab
+                                    key={value}
+                                    value={value}
+                                    onClick={() => setActiveTab(value)}
+                                    className="whitespace-nowrap p-3 text-sm text-blue-gray-500 lg:w-max lg:py-2"
+                                >
+                                    {title}
+                                </Tab>
+                            ))}
+                        </TabsHeader>
+
+                        <TabsBody>
+                            <TabPanel className="min-h-max px-0" key={'general'} value={'general'}>
+                                <ProductForm data={productData} onChange={handleOnChange} />
+                            </TabPanel>
+
+                            <TabPanel className="min-h-max px-0" key={'images'} value={'images'}>
+                                <CustomImageUpload
+                                    images={images}
+                                    feature={productData.feature_image_url}
+                                    onChangeImages={(value) => handleOnChangeImages(value)}
+                                    onChangeFeature={(value) =>
+                                        handleOnChange('feature_image_url', value)
+                                    }
+                                />
+                            </TabPanel>
+
+                            <TabPanel
+                                className="min-h-max px-0"
+                                key={'variants'}
+                                value={'variants'}
+                            >
+                                <div className="flex h-full w-full flex-col items-center justify-center gap-2 py-6 text-gray-500">
+                                    <Typography className="text-sm font-medium">
+                                        Không khả dụng bây giờ!
+                                    </Typography>
+                                    <Typography className="text-xs">
+                                        Chức năng đang được cập nhật.
+                                    </Typography>
+                                </div>
+                            </TabPanel>
+                        </TabsBody>
+                    </Tabs>
                 </CardBody>
+                <CardFooter className="p-4">
+                    {id ? (
+                        <CustomCrudGroupButtons
+                            btnConfirn={{
+                                text: 'Cập nhật',
+                                disabled: !updatable,
+                                onClick: handleOpenUpdateDialog,
+                            }}
+                            btnDelete={{
+                                text: 'Xóa',
+                                onClick: handleOpenDeleteDialog,
+                            }}
+                            btnCancel={{
+                                text: 'Hủy',
+                                onClick: handleCancel,
+                            }}
+                        />
+                    ) : (
+                        <CustomCrudGroupButtons
+                            btnConfirn={{
+                                text: 'Tạo mới',
+                                disabled: !updatable,
+                                onClick: handleOpenCreateDialog,
+                            }}
+                            btnCancel={{
+                                text: 'Hủy',
+                                onClick: handleCancel,
+                            }}
+                        />
+                    )}
+                </CardFooter>
             </Card>
 
             <CustomConfirmDialog {...dialog} />
@@ -309,4 +505,4 @@ export function ProductCreate() {
     );
 }
 
-export default ProductCreate;
+export default memo(ProductCreate);
