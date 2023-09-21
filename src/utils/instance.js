@@ -3,7 +3,10 @@ import store from '@/redux/store';
 import axios from 'axios';
 
 const instance = axios.create({
-    baseURL: import.meta.env.VITE_DEVELOPMENT_SERVER_URL,
+    baseURL:
+        import.meta.env.MODE === 'development'
+            ? import.meta.env.VITE_DEVELOPMENT_SERVER_URL
+            : import.meta.env.VITE_PRODUCTION_SERVER_URL,
     headers: {
         'Content-Type': 'application/json',
     },
