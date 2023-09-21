@@ -16,9 +16,9 @@ import {
     UserCircleIcon,
     UserIcon
 } from '@heroicons/react/24/solid';
-import Login from './pages/auth/Login';
 import ProfileUpdate from './pages/dashboard/profile/update-profile';
 import Profile from './pages/dashboard/profile/profile';
+import { Login } from './pages/auth';
 
 const icon = {
     className: 'w-5 h-5 text-inherit',
