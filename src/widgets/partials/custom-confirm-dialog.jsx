@@ -62,7 +62,7 @@ export function CustomConfirmDialog({
     }, [status, countdown]);
 
     return (
-        <Dialog open={open} handler={disabled ? handler : null}>
+        <Dialog open={open} handler={!disabled ? handler : null}>
             <DialogHeader className="flex items-center justify-center text-base">
                 <span>{title}</span>
             </DialogHeader>

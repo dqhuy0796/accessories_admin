@@ -1,5 +1,8 @@
-import * as request from '@/utils/baseRequest';
+import * as publicRequest from '@/utils/public-request';
+import * as authorizationRequest from '@/utils/authorization-request';
 import store from '../redux/store';
+
+/** PUBLIC */
 
 export const loginService = async (username, password) => {
     const path = 'auth/user/login';
@@ -8,12 +11,14 @@ export const loginService = async (username, password) => {
         password,
     };
     try {
-        const result = await request.postApi(path, payload);
+        const result = await publicRequest.postApi(path, payload);
         return result;
     } catch (error) {
         console.log(error);
     }
 };
+
+/** AUTHORIZATION */
 
 export const logoutService = async (phone_number) => {
     const path = 'auth/user/logout';
@@ -21,7 +26,7 @@ export const logoutService = async (phone_number) => {
         phone_number,
     };
     try {
-        const result = await request.postApi(path, payload);
+        const result = await authorizationRequest.postApi(path, payload);
         return result;
     } catch (error) {
         console.log(error);
@@ -35,7 +40,20 @@ export const refreshTokensService = async () => {
         'x-refresh-token': refreshToken,
     };
     try {
-        const result = await request.postApi(path, payload);
+        const result = await authorizationRequest.postApi(path, payload);
+        return result;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const updateProfileService = async (data) => {
+    const path = 'user/update';
+    const accessToken = store.getState().user.accessToken;
+    const payload = data;
+
+    try {
+        const result = await authorizationRequest.putApi(path, payload, accessToken);
         return result;
     } catch (error) {
         console.log(error);

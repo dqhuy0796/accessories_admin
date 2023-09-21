@@ -1,9 +1,4 @@
-import axios from 'axios';
 import instance from './instance';
-
-const request = axios.create({
-    baseURL: import.meta.env.VITE_DEVELOPMENT_SERVER_URL,
-});
 
 export const getApi = async (url, payload, token) => {
     const config = {

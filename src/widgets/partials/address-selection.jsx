@@ -1,10 +1,9 @@
+import { locationService } from '@/services';
 import { Input } from '@material-tailwind/react';
-import axios from 'axios';
-import _, { add } from 'lodash';
+import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import { CustomSelectOption } from '.';
-import { locationService } from '@/services';
 
 export function AddressSelection({ address, onChange }) {
     const [isLoading, setLoading] = useState(false);
@@ -85,7 +84,9 @@ export function AddressSelection({ address, onChange }) {
             } else if (error === 'district') {
                 const timeout = setTimeout(() => {
                     const result = provinces.find(
-                        (item) => item?.name_with_type === address.province || item?.name === address.province,
+                        (item) =>
+                            item?.name_with_type === address.province ||
+                            item?.name === address.province,
                     );
                     handleGetDistricts(result.code);
                 }, 10000);
@@ -93,7 +94,9 @@ export function AddressSelection({ address, onChange }) {
             } else if (error === 'ward') {
                 const timeout = setTimeout(() => {
                     const result = districts.find(
-                        (item) => item?.name_with_type === address.district || item?.name === address.district,
+                        (item) =>
+                            item?.name_with_type === address.district ||
+                            item?.name === address.district,
                     );
                     handleGetWards(result.code);
                 }, 10000);
@@ -105,13 +108,16 @@ export function AddressSelection({ address, onChange }) {
     /** EVENT HANDLER */
 
     const handleProvinceChange = (value) => {
-        const result = provinces.find((item) => item?.name_with_type === value || item?.name === value);
+        const result = provinces.find(
+            (item) => item?.name_with_type === value || item?.name === value,
+        );
 
-        if (result && result?.name_with_type !== address.province && result?.name !== address.province) {
+        if (
+            result &&
+            result?.name_with_type !== address.province &&
+            result?.name !== address.province
+        ) {
             onChange('province', value);
-            // reset lower level
-            onChange('district', '');
-            onChange('ward', '');
             setDistricts([]);
             setWards([]);
             // get new children
@@ -120,12 +126,16 @@ export function AddressSelection({ address, onChange }) {
     };
 
     const handleDistrictChange = (value) => {
-        const result = districts.find((item) => item?.name_with_type === value || item?.name === value);
+        const result = districts.find(
+            (item) => item?.name_with_type === value || item?.name === value,
+        );
 
-        if (result && result?.name_with_type !== address.district && result?.name !== address.district) {
+        if (
+            result &&
+            result?.name_with_type !== address.district &&
+            result?.name !== address.district
+        ) {
             onChange('district', value);
-            // reset lower level
-            onChange('ward', '');
             setWards([]);
             // get new children
             handleGetWards(result.code);
@@ -146,12 +156,12 @@ export function AddressSelection({ address, onChange }) {
 
     return (
         <div className="w-full">
-            <div className="grid gap-6 py-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <CustomSelectOption
                     options={provinces}
                     variant={{
                         key: 'province',
-                        label: 'Tỉnh/Thành phố thuộc Trung ương',
+                        label: 'Tỉnh/Thành phố TW',
                     }}
                     value={address.province}
                     loading={isLoading && _.isEmpty(provinces)}
@@ -161,7 +171,7 @@ export function AddressSelection({ address, onChange }) {
                     options={districts}
                     variant={{
                         key: 'district',
-                        label: 'Huyện/Quận/Thị xã/Thành phố',
+                        label: 'Huyện/Quận/TX/TP',
                     }}
                     value={address.district}
                     loading={isLoading && _.isEmpty(districts) && !_.isEmpty(address.province)}
@@ -177,16 +187,17 @@ export function AddressSelection({ address, onChange }) {
                     loading={isLoading && _.isEmpty(wards) && !_.isEmpty(address.district)}
                     onSelect={handleWardChange}
                 />
+                <div className="md:col-span-2 lg:col-span-3">
+                    <Input
+                        size="lg"
+                        color="blue"
+                        label="Địa chỉ"
+                        value={address.location || ''}
+                        onChange={handleAddressChange}
+                        required
+                    />
+                </div>
             </div>
-
-            <Input
-                size="lg"
-                color="blue"
-                label="Địa chỉ"
-                value={address.location || ''}
-                onChange={handleAddressChange}
-                required
-            />
         </div>
     );
 }

@@ -33,10 +33,7 @@ const userReducer = (state = initState, action) => {
         case UserActionTypes.ProfileUpdate:
             return {
                 ...state,
-                data: {
-                    ...state.data,
-                    ...action.payload,
-                },
+                data: action.payload,
             };
 
         default:

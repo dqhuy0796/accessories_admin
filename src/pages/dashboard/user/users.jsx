@@ -1,18 +1,69 @@
-import { dataService } from '@/services';
+import { dataService, productService } from '@/services';
 import { CustomConfirmDialog, CustomCrudMenu, CustomTableMenu } from '@/widgets/partials';
-import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid';
-import { Card, CardBody, Chip, Typography } from '@material-tailwind/react';
+import {
+    ArrowsUpDownIcon,
+    CheckCircleIcon,
+    ExclamationCircleIcon,
+    FunnelIcon,
+    MagnifyingGlassIcon,
+    PlusIcon,
+} from '@heroicons/react/24/solid';
+import {
+    Button,
+    Card,
+    CardBody,
+    CardHeader,
+    Checkbox,
+    Chip,
+    Collapse,
+    Input,
+    Menu,
+    MenuHandler,
+    MenuItem,
+    MenuList,
+    Typography,
+} from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export function Users() {
     const [isLoading, setLoading] = useState(false);
     const [users, setUsers] = useState([]);
+    const [openFilter, setOpenFilter] = useState(false);
+    const [openSorter, setOpenSorter] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalResults, setTotalResults] = useState(0);
+    const [filterMenu, setFilterMenu] = useState([]);
+    const [filteredCategories, setFilteredCategories] = useState([]);
     const [dialog, setDialog] = useState({
         title: 'Xóa tài khoản',
         text: 'Xác nhận xóa tài khoản?',
     });
     const navigate = useNavigate();
+    const dataTable = [
+        {
+            title: 'số điện thoại',
+            key: 'phone_number',
+            className: 'text-left',
+        },
+        {
+            title: 'email',
+            key: 'email',
+        },
+        {
+            title: 'họ tên',
+            key: 'name',
+        },
+        {
+            title: 'địa chỉ',
+            key: 'address',
+        },
+        {
+            title: 'loại tài khoản',
+            key: 'role',
+        },
+    ];
 
     const handleGetUsers = async () => {
         setLoading(true);
@@ -23,6 +74,25 @@ export function Users() {
         }
         setLoading(false);
     };
+
+    const handleGetProductsCount = async () => {
+        setLoading(true);
+        const response = await productService.getProductsCountService();
+        if (response && response.code === 'SUCCESS') {
+            setFilterMenu(response.result);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        handleGetProductsCount();
+
+        const title = document.title;
+
+        document.title = 'Quản lý tài khoản';
+
+        return () => (document.title = title);
+    }, []);
 
     useEffect(() => {
         handleGetUsers();
@@ -94,45 +164,158 @@ export function Users() {
     const handleRedirectToCreate = () => {
         navigate(`/dashboard/user/create`);
     };
-    const handleRedirectToPreview = (id) => {
-        navigate(`/dashboard/user/detail/${id}`);
+    const handleRedirectToPreview = (username) => {
+        navigate(`/dashboard/user/detail/${username}`);
     };
-    const handleRedirectToUpdate = (id) => {
-        navigate(`/dashboard/user/update/${id}`);
+    const handleRedirectToUpdate = (username) => {
+        navigate(`/dashboard/user/update/${username}`);
+    };
+    const handleToggleFilter = () => {
+        setOpenFilter((prevOpen) => !prevOpen);
+    };
+    const handleToggleSorter = () => {
+        setOpenSorter((prevOpen) => !prevOpen);
+    };
+    /** FILTER */
+
+    const handleOnFilterCategories = (value) => {
+        const isValueSelected = filteredCategories.includes(value);
+        const newOption = isValueSelected
+            ? filteredCategories.filter((item) => item !== value)
+            : [...filteredCategories, value];
+        setFilteredCategories(newOption);
     };
 
-    const dataTable = [
-        {
-            title: 'số điện thoại',
-            key: 'phone_number',
-            className: 'text-left',
-        },
-        {
-            title: 'email',
-            key: 'email',
-        },
-        {
-            title: 'họ tên',
-            key: 'name',
-        },
-        {
-            title: 'địa chỉ',
-            key: 'address',
-        },
-        {
-            title: 'loại tài khoản',
-            key: 'role',
-        },
-    ];
+    const handleResetFilteredCategories = () => {
+        setFilteredCategories([]);
+    };
+
+    /**SORTER */
 
     return (
         <div className="my-10 flex flex-col gap-12">
             <Typography variant="h4">Danh sách tài khoản</Typography>
             <Card>
+                <CardHeader
+                    color="transparent"
+                    shadow={false}
+                    floated={false}
+                    className="m-0 p-4 pb-0"
+                >
+                    <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+                        <div className="lg:col-span-2">
+                            <Input
+                                size="md"
+                                label="Tìm kiếm"
+                                color="blue-gray"
+                                icon={<MagnifyingGlassIcon className="h-4 w-4" />}
+                            />
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-end gap-3 sm:flex-nowrap md:col-span-2 lg:col-span-3">
+                            <Button
+                                size="md"
+                                color="blue"
+                                variant="gradient"
+                                className="flex w-full items-center justify-center gap-1 pl-4 sm:w-max"
+                                onClick={handleRedirectToCreate}
+                            >
+                                <PlusIcon className="h-4 w-4" />
+                                <span>Sản phẩm mới</span>
+                            </Button>
+
+                            <Button
+                                size="md"
+                                color="blue-gray"
+                                variant="outlined"
+                                className="flex w-[calc(50%-6px)] items-center justify-center gap-1 pl-4 sm:w-max"
+                                onClick={handleToggleFilter}
+                            >
+                                <FunnelIcon className="h-4 w-4" />
+                                Bộ lọc
+                            </Button>
+
+                            <Button
+                                size="md"
+                                color="blue-gray"
+                                variant="outlined"
+                                className="flex w-[calc(50%-6px)] items-center justify-center gap-1 pl-4 sm:w-max"
+                                onClick={handleToggleSorter}
+                            >
+                                <ArrowsUpDownIcon className="h-4 w-4" />
+                                Sắp xếp
+                            </Button>
+                        </div>
+                    </div>
+
+                    <Collapse open={openFilter}>
+                        <div className="mt-4 rounded-lg border border-blue-gray-100 p-4">
+                            <Typography className="ml-2 mb-2 text-sm font-semibold">
+                                Danh mục
+                            </Typography>
+                            <div className="grid grid-cols-2 gap-x-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                                <Checkbox
+                                    color="blue"
+                                    value={'all'}
+                                    label={
+                                        <span className="text-xs font-medium">
+                                            {`Tất cả (${filterMenu.reduce((sum, product) => {
+                                                return sum + Number(product.product_count);
+                                            }, 0)})`}
+                                        </span>
+                                    }
+                                    checked={filteredCategories.length === 0 ? true : false}
+                                    onChange={handleResetFilteredCategories}
+                                />
+                                {filterMenu &&
+                                    filterMenu.length > 0 &&
+                                    filterMenu.map((item) => (
+                                        <Checkbox
+                                            color="blue"
+                                            key={item.id}
+                                            value={item.slug}
+                                            label={
+                                                <span className="text-xs font-medium line-clamp-1">
+                                                    {`${item.name} (${item.product_count})`}
+                                                </span>
+                                            }
+                                            checked={
+                                                filteredCategories.includes(item.slug)
+                                                    ? true
+                                                    : false
+                                            }
+                                            onChange={() => handleOnFilterCategories(item.slug)}
+                                        />
+                                    ))}
+                            </div>
+                        </div>
+                    </Collapse>
+
+                    <Collapse open={openSorter}>
+                        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                            <Menu>
+                                <MenuHandler>
+                                    <Button
+                                        size="sm"
+                                        color="blue-gray"
+                                        variant="outlined"
+                                        className="flex items-center justify-center gap-2"
+                                    >
+                                        <ArrowsUpDownIcon className="h-4 w-4" />
+                                        <span>tên</span>
+                                    </Button>
+                                </MenuHandler>
+                                <MenuList>
+                                    <MenuItem>a-z A-Z</MenuItem>
+                                    <MenuItem>z-a Z-A</MenuItem>
+                                </MenuList>
+                            </Menu>
+                        </div>
+                    </Collapse>
+                </CardHeader>
                 <CardBody className="p-4">
-                    <CustomTableMenu onCreate={handleRedirectToCreate} />
                     <div className="overflow-x-auto">
-                        <table className="mt-4 w-full min-w-[640px] table-auto">
+                        <table className="w-full min-w-[640px] table-auto">
                             <thead>
                                 <tr>
                                     {dataTable.map((item) => (
@@ -140,7 +323,7 @@ export function Users() {
                                             key={item.key}
                                             className="text-ellipsis whitespace-nowrap border-t border-blue-gray-100 first:text-left"
                                         >
-                                            <Typography className="py-3 px-5 text-xs font-bold uppercase text-blue-gray-400">
+                                            <Typography className="py-3 px-5 text-xs font-bold uppercase">
                                                 {item.title}
                                             </Typography>
                                         </th>
@@ -150,65 +333,63 @@ export function Users() {
                             </thead>
                             <tbody>
                                 {users && users.length > 0 ? (
-                                    users.map((item, index) => {
-                                        const className = 'text-ellipsis py-3 px-5 border-t border-blue-gray-100';
-                                        return (
-                                            <tr key={index}>
-                                                {dataTable.map((col) => (
-                                                    <td key={col.key} className={className}>
-                                                        <Typography className="whitespace-nowrap italic text-blue-gray-600 ">
+                                    users.map((item, index) => (
+                                        <tr key={index}>
+                                            {dataTable.map((col) => (
+                                                <td
+                                                    key={col.key}
+                                                    className="text-ellipsis border-t border-blue-gray-100 py-3 px-5"
+                                                >
+                                                    {col.key === 'role' ? (
+                                                        <Chip
+                                                            variant="gradient"
+                                                            color={
+                                                                item.role_id === 0
+                                                                    ? 'deep-orange'
+                                                                    : item.role_id === 1
+                                                                    ? 'deep-purple'
+                                                                    : item.role_id === 2
+                                                                    ? 'blue'
+                                                                    : 'blue-gray'
+                                                            }
+                                                            value={item[col.key]}
+                                                            className="w-max py-px text-xs"
+                                                        />
+                                                    ) : (
+                                                        <Typography
+                                                            className={`${
+                                                                col.key === 'address'
+                                                                    ? 'min-w-[240px] line-clamp-1'
+                                                                    : col.key === 'name'
+                                                                    ? 'whitespace-nowrap font-medium'
+                                                                    : 'whitespace-nowrap italic'
+                                                            }`}
+                                                        >
                                                             {item[col.key]}
                                                         </Typography>
-                                                    </td>
-                                                ))}
-                                                {/* <td className={className}>
-                                                    <Typography className="whitespace-nowrap italic text-blue-gray-600 ">
-                                                        {item.email}
-                                                    </Typography>
+                                                    )}
                                                 </td>
-                                                <td className={className}>
-                                                    <Typography className="whitespace-nowrap font-medium text-blue-gray-600 ">
-                                                        {item.name}
-                                                    </Typography>
-                                                </td>
-                                                <td className={className}>
-                                                    <Typography className="min-w-[320px] italic text-blue-gray-600 line-clamp-1">
-                                                        {item.address}
-                                                    </Typography>
-                                                </td>
-                                                <td className={className + ' text-center'}>
-                                                    <Chip
-                                                        variant="gradient"
-                                                        color={
-                                                            item.role_id === 0
-                                                                ? 'deep-orange'
-                                                                : item.role_id === 1
-                                                                ? 'deep-purple'
-                                                                : item.role_id === 2
-                                                                ? 'blue'
-                                                                : 'blue-gray'
-                                                        }
-                                                        value={item.role}
-                                                        className="py-px text-xs"
-                                                    />
-                                                </td> */}
-                                                <td className="border-t border-blue-gray-100 py-3 pl-5 text-right">
-                                                    <CustomCrudMenu
-                                                        onPreview={() => handleRedirectToPreview(item.id)}
-                                                        onUpdate={() => handleRedirectToUpdate(item.id)}
-                                                        onDelete={() => handleOpenDialog(item)}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
+                                            ))}
+                                            <td className="border-t border-blue-gray-100 py-3 pl-5 text-right">
+                                                <CustomCrudMenu
+                                                    onPreview={() =>
+                                                        handleRedirectToPreview(item.phone_number)
+                                                    }
+                                                    onUpdate={() =>
+                                                        handleRedirectToUpdate(item.phone_number)
+                                                    }
+                                                    onDelete={() => handleOpenDialog(item)}
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={6}
-                                            className="text-ellipsis whitespace-nowrap border-t border-blue-gray-100 py-3 px-5"
+                                            colSpan={dataTable.length + 1}
+                                            className="w-full text-ellipsis whitespace-nowrap border-t border-blue-gray-100 py-3 px-5"
                                         >
-                                            Không có dữ liệu người dùng nào
+                                            Không có bản ghi dữ liệu người dùng nào
                                         </td>
                                     </tr>
                                 )}

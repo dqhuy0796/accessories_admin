@@ -1,7 +1,8 @@
-import * as request from '@/utils/baseRequest';
+import * as publicRequest from '@/utils/public-request';
+import * as authorizationRequest from '@/utils/authorization-request';
 import store from '../redux/store';
 
-/** PRODUCT */
+/** PUBLIC */
 
 export const getCategoriesService = async () => {
     const path = 'category/get';
@@ -9,7 +10,7 @@ export const getCategoriesService = async () => {
     const payload = {};
 
     try {
-        const result = await request.getApi(path, payload);
+        const result = await publicRequest.getApi(path, payload);
         return result;
     } catch (error) {
         console.log(error);
@@ -22,7 +23,7 @@ export const getMaterialsService = async () => {
     const payload = {};
 
     try {
-        const result = await request.getApi(path, payload);
+        const result = await publicRequest.getApi(path, payload);
         return result;
     } catch (error) {
         console.log(error);
@@ -35,22 +36,7 @@ export const getProductsCountService = async () => {
     const payload = {};
 
     try {
-        const result = await request.getApi(path, payload);
-        return result;
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-export const createProductService = async (data) => {
-    const path = 'product/create';
-
-    const accessToken = store.getState().user.accessToken;
-
-    const payload = data;
-
-    try {
-        const result = await request.postApi(path, payload, accessToken);
+        const result = await publicRequest.getApi(path, payload);
         return result;
     } catch (error) {
         console.log(error);
@@ -66,7 +52,7 @@ export const getProductsService = async (categories, page) => {
     };
 
     try {
-        const result = await request.getApi(path, payload);
+        const result = await publicRequest.getApi(path, payload);
         return result;
     } catch (error) {
         console.log(error);
@@ -81,7 +67,24 @@ export const getProductByIdService = async (product_id) => {
     };
 
     try {
-        const result = await request.getApi(path, payload);
+        const result = await publicRequest.getApi(path, payload);
+        return result;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+/** AUTHORIZATION */
+
+const accessToken = store.getState().user.accessToken;
+
+export const createProductService = async (data) => {
+    const path = 'product/create';
+
+    const payload = data;
+
+    try {
+        const result = await authorizationRequest.postApi(path, payload, accessToken);
         return result;
     } catch (error) {
         console.log(error);
@@ -94,7 +97,7 @@ export const updateProductService = async (data) => {
     const payload = data;
 
     try {
-        const result = await request.putApi(path, payload);
+        const result = await authorizationRequest.putApi(path, payload, accessToken);
         return result;
     } catch (error) {
         console.log(error);
@@ -107,7 +110,7 @@ export const deleteProductService = async (data) => {
     const payload = data;
 
     try {
-        const result = await request.deleteApi(path, payload);
+        const result = await authorizationRequest.deleteApi(path, payload, accessToken);
         return result;
     } catch (error) {
         console.log(error);

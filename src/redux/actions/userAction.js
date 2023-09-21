@@ -1,4 +1,4 @@
-import { userService } from '@/services';
+import { authService } from '@/services';
 import { UserActionTypes } from '../constants';
 
 export const login = (data) => ({
@@ -23,13 +23,13 @@ export const mapTokens = (accessToken, refreshToken) => ({
 });
 
 export const refreshTokens = () => async (dispatch) => {
-    const response = await userService.refreshTokensService();
+    const response = await authService.refreshTokensService();
     dispatch(mapTokens(response.accessToken, response.refreshToken));
 };
 
 // PROFILE
 
-export const ProfileUpdate = (newProfile) => ({
+export const updateProfile = (newProfile) => ({
     type: UserActionTypes.ProfileUpdate,
     payload: newProfile,
 });

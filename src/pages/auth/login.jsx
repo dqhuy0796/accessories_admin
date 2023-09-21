@@ -1,15 +1,13 @@
 import { login } from '@/redux/actions/userAction';
-import { userService } from '@/services';
+import { authService } from '@/services';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import {
     Button,
     Card,
     CardBody,
     CardFooter,
-    Checkbox,
-    IconButton,
     Input,
-    Typography,
+    Typography
 } from '@material-tailwind/react';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -34,7 +32,7 @@ export function Login() {
 
     const handleLogin = async (username, password) => {
         try {
-            const response = await userService.loginService(username, password);
+            const response = await authService.loginService(username, password);
             if (response && response.code === 'SUCCESS') {
                 const { code, message, result, accessToken, refreshToken } = response;
                 dispatch(

@@ -1,10 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { Dashboard, Auth } from '@/layouts';
+import { Auth, Dashboard } from '@/layouts';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import store from './redux/store';
-import { useEffect, useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { logout, refreshTokens } from './redux/actions/userAction';
-import { userService } from './services';
 
 function App() {
     const dispatch = useDispatch();

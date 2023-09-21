@@ -1,4 +1,4 @@
-import * as request from '@/utils/baseRequest';
+import * as request from '@/utils/authorization-request';
 import store from '../redux/store';
 
 export const rollbackCloudUpload = async (images) => {

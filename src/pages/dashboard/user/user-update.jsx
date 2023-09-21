@@ -1,7 +1,19 @@
 import { dataService } from '@/services';
-import { AddressSelection, CustomConfirmDialog, CustomSelectOption, UserDetailsItem } from '@/widgets/partials';
-import { ArrowPathIcon, CheckCircleIcon, ExclamationCircleIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { Button, Card, CardBody, Input, Typography } from '@material-tailwind/react';
+import { UserEditorForm } from '@/widgets/layout';
+import {
+    AddressSelection,
+    CustomConfirmDialog,
+    CustomCrudGroupButtons,
+    CustomSelectOption,
+    UserDetailsItem,
+} from '@/widgets/partials';
+import {
+    ArrowPathIcon,
+    CheckCircleIcon,
+    ExclamationCircleIcon,
+    XMarkIcon,
+} from '@heroicons/react/24/solid';
+import { Button, Card, CardBody, CardFooter, Input, Typography } from '@material-tailwind/react';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -17,7 +29,7 @@ export function UserUpdate() {
         text: 'Xác nhận cập nhật thông tin tài khoản?',
     });
     const navigate = useNavigate();
-    const { id } = useParams();
+    const { username } = useParams();
 
     useEffect(() => {
         const handleGetRoles = async () => {
@@ -34,9 +46,9 @@ export function UserUpdate() {
             }, 2000);
         };
 
-        const handleGetUserById = async (id) => {
+        const handleGetUserByUsername = async (username) => {
             setLoading(true);
-            let response = await dataService.getUserByIdService(id);
+            let response = await dataService.getUserByUsernameService(username);
             if (response && response.code === 'SUCCESS') {
                 response.result.birth = handleFormatDate(response.result.birth);
                 response.result.address = handleConvertAddress(response.result.address);
@@ -46,7 +58,7 @@ export function UserUpdate() {
             setLoading(false);
         };
 
-        handleGetUserById(id);
+        handleGetUserByUsername(username);
 
         handleGetRoles();
     }, []);
@@ -169,7 +181,7 @@ export function UserUpdate() {
         handleUpdateUser(userData);
     };
 
-    const handleOpenDialog = () => {
+    const handleOpenUpdateDialog = () => {
         setDialog((prevState) => ({
             ...prevState,
             open: true,
@@ -188,118 +200,35 @@ export function UserUpdate() {
         }));
     };
 
-    const contents = [
-        {
-            layout: 'updatable',
-            items: [
-                {
-                    key: 'name',
-                    type: 'text',
-                    label: 'Họ tên',
-                },
-                {
-                    key: 'birth',
-                    type: 'date',
-                    label: 'Ngày sinh',
-                },
-            ],
-        },
-        {
-            layout: 'readonly',
-            items: [
-                {
-                    key: 'phone_number',
-                    type: 'tel',
-                    label: 'Số điện thoại',
-                },
-                {
-                    key: 'email',
-                    type: 'email',
-                    label: 'Email',
-                },
-                {
-                    key: 'password',
-                    type: 'password',
-                    label: 'Mật khẩu',
-                },
-            ],
-        },
-    ];
+    const handleCancel = () => {
+        navigate(-1);
+    };
 
     return (
         <div className="my-10 flex flex-col gap-12">
             <Typography variant="h4">Cập nhật thông tin tài khoản</Typography>
             <Card>
-                <CardBody className='p-4'>
-                    <div className="mt-12 grid gap-6 sm:grid-cols-2">
-                        <CustomSelectOption
-                            options={roles}
-                            variant={{ label: 'Loại tài khoản' }}
-                            value={userData.role}
-                            loading={isLoading && _.isEmpty(roles)}
-                            onSelect={handleOnSelectRole}
-                        />
-                    </div>
-
-                    {contents.map(({ layout, items }) =>
-                        layout === 'readonly' ? (
-                            <div key={layout} className="mt-12 grid gap-6">
-                                {items.map((item) => (
-                                    <div key={item.key} className="flex items-start justify-between gap-4">
-                                        <UserDetailsItem
-                                            key={item.key}
-                                            label={item.label}
-                                            loading={isLoading && _.isEmpty(userData)}
-                                            text={userData[item.key] || 'Unknown'}
-                                        />
-                                        <Typography color="blue" className="shrink-0 text-sm font-semibold">
-                                            Chỉnh sửa
-                                        </Typography>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div key={layout} className="mt-12 grid gap-6 sm:grid-cols-2">
-                                {items.map((item) => (
-                                    <Input
-                                        {...item}
-                                        color="blue"
-                                        value={userData[item.key] || ''}
-                                        onChange={(e) => handleOnChangeInput(item.key, e.target.value)}
-                                    />
-                                ))}
-                            </div>
-                        ),
+                <CardBody className="p-4">
+                    {!_.isEmpty(userData) && (
+                        <UserEditorForm data={userData} onChange={handleOnChangeInput} />
                     )}
-
-                    <div className="mt-12">
-                        <AddressSelection address={userData.address} onChange={handleOnChangeAddress} />
-                    </div>
-
-                    <div className="mt-12 flex items-center gap-4">
-                        <Button
-                            color="blue"
-                            variant="gradient"
-                            disabled={!updatable}
-                            className="flex items-center gap-3 pl-4"
-                            onClick={handleOpenDialog}
-                        >
-                            <ArrowPathIcon className="h-5 w-5 text-white" />
-                            Cập nhật
-                        </Button>
-                        <Button
-                            color="red"
-                            variant="gradient"
-                            className="flex items-center gap-3 pl-4"
-                            onClick={() => navigate(-1)}
-                        >
-                            <XMarkIcon className="h-5 w-5 text-white" />
-                            Hủy bỏ
-                        </Button>
-                    </div>
                 </CardBody>
-                <CustomConfirmDialog {...dialog} />
+
+                <CardFooter>
+                    <CustomCrudGroupButtons
+                        btnConfirn={{
+                            text: 'Lưu lại',
+                            disabled: !updatable,
+                            onClick: handleOpenUpdateDialog,
+                        }}
+                        btnCancel={{
+                            text: 'Hủy',
+                            onClick: handleCancel,
+                        }}
+                    />
+                </CardFooter>
             </Card>
+            <CustomConfirmDialog {...dialog} />
         </div>
     );
 }

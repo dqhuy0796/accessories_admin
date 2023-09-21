@@ -3,7 +3,6 @@ import {
     ProductCreate,
     ProductDetails,
     Products,
-    Profile,
     Tables,
     UserCreate,
     UserDetails,
@@ -19,6 +18,7 @@ import {
 } from '@heroicons/react/24/solid';
 import Login from './pages/auth/Login';
 import ProfileUpdate from './pages/dashboard/profile/update-profile';
+import Profile from './pages/dashboard/profile/profile';
 
 const icon = {
     className: 'w-5 h-5 text-inherit',
@@ -71,11 +71,11 @@ export const routes = [
                         element: <UserCreate />,
                     },
                     {
-                        path: '/user/detail/:id',
+                        path: '/user/detail/:username',
                         element: <UserDetails />,
                     },
                     {
-                        path: '/user/update/:id',
+                        path: '/user/update/:username',
                         element: <UserUpdate />,
                     },
                 ],

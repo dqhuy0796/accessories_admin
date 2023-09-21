@@ -1,63 +1,89 @@
 import PropTypes from 'prop-types';
 import { Card, CardHeader, CardBody, Typography } from '@material-tailwind/react';
 
-export function ProfileInfoCard({ title, description, details, action }) {
+export function ProfileInfoCard({ data, action }) {
+    const details = [
+        {
+            title: 'Số diện thoại',
+            key: 'phone_number',
+        },
+        {
+            title: 'Email',
+            key: 'email',
+        },
+        {
+            title: 'Địa chỉ',
+            key: 'address',
+        },
+        {
+            title: 'Liên kết',
+            key: 'social_media',
+        },
+    ];
+
     return (
         <Card color="transparent" shadow={false}>
             <CardHeader
                 color="transparent"
                 shadow={false}
                 floated={false}
-                className="mx-0 mt-0 mb-4 flex items-center justify-between gap-4"
+                className="m-0 flex items-end justify-between gap-4 rounded-none"
             >
-                <Typography variant="h6" color="blue-gray">
-                    {title}
+                <Typography variant="h5" color="blue-gray">
+                    Hồ sơ
                 </Typography>
                 {action}
             </CardHeader>
-            <CardBody className="p-0">
-                {description && (
-                    <Typography variant="small" className="font-normal">
-                        {description}
-                    </Typography>
-                )}
-                {description && details ? <hr className="my-8 border-blue-gray-100" /> : null}
-                {details && (
-                    <ul className="flex flex-col gap-4 p-0">
-                        {Object.keys(details).map((el, key) => (
-                            <li key={key} className="flex items-start gap-4">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-semibold capitalize"
-                                >
-                                    {el}:
+            <CardBody className="grid gap-6 px-0">
+                <hr className="border-blue-gray-100" />
+
+                <ul className="flex flex-col gap-6 p-0">
+                    {details.map((item) => (
+                        <li key={item.key} className="flex items-start gap-4">
+                            <Typography
+                                variant="small"
+                                color="blue-gray"
+                                className="whitespace-nowrap font-semibold"
+                            >
+                                {item.title}:
+                            </Typography>
+
+                            {item.key === 'social_media' ? (
+                                <div className="flex items-center gap-4 text-xl">
+                                    <i className="fa-brands fa-facebook text-blue-700" />
+                                    <i className="fa-brands fa-twitter text-blue-400" />
+                                    <i className="fa-brands fa-instagram text-purple-500" />
+                                </div>
+                            ) : (
+                                <Typography variant="small" className="font-normal">
+                                    {data[item.key] ? data[item.key] : ''}
                                 </Typography>
-                                {typeof details[el] === 'string' ? (
-                                    <Typography variant="small" className="font-normal">
-                                        {details[el]}
-                                    </Typography>
-                                ) : (
-                                    details[el]
-                                )}
-                            </li>
-                        ))}
-                    </ul>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+
+                <hr className="border-blue-gray-100" />
+
+                {data?.bio ? (
+                    <div
+                        className="description text-sm"
+                        dangerouslySetInnerHTML={{ __html: data?.bio }}
+                    />
+                ) : (
+                    <Typography className="description text-sm italic">
+                        Chưa có thông tin giới thiệu bản thân
+                    </Typography>
                 )}
             </CardBody>
         </Card>
     );
 }
 
-ProfileInfoCard.defaultProps = {
-    action: null,
-    description: null,
-    details: {},
-};
+ProfileInfoCard.defaultProps = {};
 
 ProfileInfoCard.propTypes = {
-    title: PropTypes.string.isRequired,
-    description: PropTypes.node,
+    data: PropTypes.object,
     details: PropTypes.object,
 };
 

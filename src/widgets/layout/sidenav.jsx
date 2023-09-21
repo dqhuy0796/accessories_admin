@@ -5,7 +5,7 @@ import { Avatar, Button, IconButton, Typography } from '@material-tailwind/react
 import { useMaterialTailwindController, setOpenSidenav } from '@/context';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '@/redux/actions/userAction';
-import { userService } from '@/services';
+import { authService } from '@/services';
 
 export function Sidenav({ brandImg, brandName, routes }) {
     const [controllerMT, dispatchMT] = useMaterialTailwindController();
@@ -14,7 +14,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
     const user = useSelector((state) => state.user.data);
 
     const handleLogout = async () => {
-        const isLogout = await userService.logoutService(user.phone_number);
+        const isLogout = await authService.logoutService(user.phone_number);
         if (isLogout) {
             dispatch(logout());
         }

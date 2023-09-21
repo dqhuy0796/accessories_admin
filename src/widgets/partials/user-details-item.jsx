@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 export function UserDetailsItem({ label, text, encrypt, loading }) {
     if (!loading) {
         return (
-            <div className="">
+            <div className="pb-1">
                 <Typography as="h6" className="text-xs font-normal text-blue-gray-500">
                     {label}
                 </Typography>
                 <Typography as="h4" className="text-sm font-medium text-blue-gray-700">
-                    {encrypt === 'password' ? '*'.repeat(16) : encrypt ? `${text.slice(0, 3)}${'*'.repeat(9)}` : text}
+                    {encrypt === 'password' ? '*'.repeat(12) : encrypt ? `${text.slice(0, 3)}${'*'.repeat(9)}` : text}
                 </Typography>
             </div>
         );
@@ -26,11 +26,6 @@ export function UserDetailsItem({ label, text, encrypt, loading }) {
         </div>
     );
 }
-
-UserDetailsItem.defaultProps = {
-    label: 'catch me if you can',
-    text: 'if you not you are a dog, hihi',
-};
 
 UserDetailsItem.propTypes = {
     label: PropTypes.string,

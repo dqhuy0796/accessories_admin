@@ -5,6 +5,7 @@ export * from '@/widgets/partials/custom-select-option';
 export * from '@/widgets/partials/custom-confirm-dialog';
 export * from '@/widgets/partials/custom-crud-menu';
 export * from '@/widgets/partials/custom-image-upload';
+export * from '@/widgets/partials/custom-avatar-upload';
 export * from '@/widgets/partials/custom-currency-display';
 export * from '@/widgets/partials/custom-filter-menu';
 export * from '@/widgets/partials/custom-editor';

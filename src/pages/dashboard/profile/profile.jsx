@@ -1,32 +1,20 @@
+import { conversationsData } from '@/data';
+import { MessageCard, ProfileInfoCard } from '@/widgets/cards';
+import { PencilIcon } from '@heroicons/react/24/solid';
 import {
+    Avatar,
+    Button,
     Card,
     CardBody,
-    CardHeader,
-    CardFooter,
-    Avatar,
-    Typography,
-    Tabs,
-    TabsHeader,
-    Tab,
-    Switch,
-    Tooltip,
-    Button,
     IconButton,
+    Tooltip,
+    Typography,
 } from '@material-tailwind/react';
-import {
-    HomeIcon,
-    ChatBubbleLeftEllipsisIcon,
-    Cog6ToothIcon,
-    PencilIcon,
-} from '@heroicons/react/24/solid';
-import { Link } from 'react-router-dom';
-import { ProfileInfoCard, MessageCard } from '@/widgets/cards';
-import { platformSettingsData, conversationsData, projectsData } from '@/data';
 import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 export function Profile() {
     const user = useSelector((state) => state.user.data);
-    console.log(user);
 
     const displayPosition = (id) => {
         switch (id) {
@@ -52,7 +40,7 @@ export function Profile() {
                         <div className="flex items-center gap-6">
                             <div className="group relative overflow-hidden rounded-full">
                                 <Avatar
-                                    src="/img/bruce-mars.jpeg"
+                                    src={user?.avatar.secure_url || '/img/bruce-mars.jpeg'}
                                     alt="bruce-mars"
                                     size="xxl"
                                     withBorder={true}
@@ -70,31 +58,18 @@ export function Profile() {
                                     <span className="relative h-2 w-2 rounded-full bg-gradient-to-br from-green-300 to-green-600 shadow-all shadow-green-200"></span>
                                 </Typography>
                                 <Typography variant="small" className="font-normal">
-                                    {displayPosition(user.role_id)}
+                                    {displayPosition(user?.role_id)}
                                 </Typography>
                             </div>
                         </div>
                     </div>
                     <div className="mb-12 grid gap-12 px-4 lg:grid-cols-2">
                         <ProfileInfoCard
-                            title="Profile"
-                            description="Hi, I'm Alec Thompson, Decisions: If you can't decide, the answer is no. If two equally difficult paths, choose the one more painful in the short term (pain avoidance is creating an illusion of equality)."
-                            details={{
-                                mobile: user.phone_number,
-                                email: user.email,
-                                location: user.address,
-                                social: (
-                                    <div className="mt-1 flex items-center gap-4">
-                                        <i className="fa-brands fa-facebook text-blue-700" />
-                                        <i className="fa-brands fa-twitter text-blue-400" />
-                                        <i className="fa-brands fa-instagram text-purple-500" />
-                                    </div>
-                                ),
-                            }}
+                            data={user}
                             action={
                                 <Tooltip content="Chỉnh sửa">
                                     <Link to={'/dashboard/profile/update'}>
-                                        <IconButton size="sm" variant="text">
+                                        <IconButton size="sm" variant="gradient" color="blue">
                                             <PencilIcon className="h-4 w-4" />
                                         </IconButton>
                                     </Link>
@@ -102,7 +77,7 @@ export function Profile() {
                             }
                         />
                         <div>
-                            <Typography variant="h6" color="blue-gray" className="mb-3">
+                            <Typography variant="h5" color="blue-gray" className="mb-3">
                                 Tin nhắn hệ thống
                             </Typography>
                             <ul className="grid gap-6">
