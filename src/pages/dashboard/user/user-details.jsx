@@ -1,19 +1,10 @@
-import { dataService } from '@/services';
+import { userService } from '@/services';
 import { ProfileInfoCard } from '@/widgets/cards';
-import { CustomConfirmDialog, CustomCrudGroupButtons, UserDetailsItem } from '@/widgets/partials';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { CheckCircleIcon, ExclamationCircleIcon, PencilIcon } from '@heroicons/react/24/solid';
-import {
-    Avatar,
-    Button,
-    Card,
-    CardBody,
-    CardFooter,
-    IconButton,
-    Typography,
-} from '@material-tailwind/react';
+import { CustomConfirmDialog, CustomCrudGroupButtons } from '@/widgets/partials';
+import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid';
+import { Avatar, Card, CardBody, CardFooter, Typography } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export function UserDetails() {
     const [isLoading, setLoading] = useState(false);
@@ -28,7 +19,7 @@ export function UserDetails() {
     useEffect(() => {
         const handleGetUserByUsername = async (username) => {
             setLoading(true);
-            let response = await dataService.getUserByUsernameService(username);
+            let response = await userService.getUserByUsernameService(username);
             if (response && response.code === 'SUCCESS') {
                 response.result.birth = handleFormatDate(response.result.birth);
                 setUserData(response.result);
@@ -47,19 +38,6 @@ export function UserDetails() {
         return `${year}-${month}-${day}`;
     };
 
-    const displayPosition = (id) => {
-        switch (id) {
-            case 0:
-                return 'CEO / Co-Founder';
-            case 1:
-                return 'Manager';
-            case 2:
-                return 'Employee';
-            default:
-                return 'Unknown';
-        }
-    };
-
     /** DATA SUBMIT HANDLER */
 
     const handleDeleteUser = async (data) => {
@@ -72,7 +50,7 @@ export function UserDetails() {
 
             const response = await new Promise((resolve) => {
                 setTimeout(async () => {
-                    const result = await dataService.deleteUserService(data);
+                    const result = await userService.deleteUserService(data);
                     resolve(result);
                 }, 2000);
             });
@@ -156,25 +134,19 @@ export function UserDetails() {
                     <div className="flex flex-wrap items-center justify-center gap-6 md:flex-nowrap">
                         <div className="group relative shrink-0 overflow-hidden rounded-full">
                             <Avatar
-                                src={userData?.avatar?.secure_url || '/img/bruce-mars.jpeg'}
+                                src={userData?.avatar?.secure_url ?? '/img/default-avatar.jpg'}
                                 alt="bruce-mars"
                                 withBorder={true}
                                 color="green"
                                 className="h-60 w-60 p-0.5 shadow-lg shadow-blue-gray-500/40"
                             />
-
-                            <div className="absolute inset-x-0 top-1/2 bottom-0 grid translate-y-full place-items-center bg-gray-500/50 shadow-all transition-transform duration-300 group-hover:translate-y-0">
-                                <IconButton variant="gradient" size="lg">
-                                    <PencilIcon className="h-5 w-5" />
-                                </IconButton>
-                            </div>
                         </div>
                         <div className="flex-1 text-center md:text-left">
                             <Typography variant="h5" className="font-semibold">
-                                {userData?.name}
+                                {userData.name ?? ''}
                             </Typography>
                             <Typography variant="small" className="font-normal">
-                                {userData?.role}
+                                {userData.role ?? ''}
                             </Typography>
                         </div>
                     </div>

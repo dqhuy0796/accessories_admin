@@ -25,6 +25,8 @@ instance.interceptors.request.use(
     },
 );
 
+let retryCounter = 0;
+
 instance.interceptors.response.use(
     (res) => {
         return res;
@@ -32,11 +34,11 @@ instance.interceptors.response.use(
     async (err) => {
         const originalConfig = err.config;
         if (err.response) {
-            if (
-                (err.response.status === 401 || err.response.status === 403) &&
-                !originalConfig._retry
-            ) {
+            if (err.response.status === 401 && !originalConfig._retry && retryCounter < 5) {
+                
                 originalConfig._retry = true;
+                retryCounter++;
+
                 try {
                     const res = await instance.post('/auth/user/refresh', {
                         'x-refresh-token': store.getState().user.refreshToken,

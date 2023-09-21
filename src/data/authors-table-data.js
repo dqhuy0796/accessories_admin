@@ -32,7 +32,7 @@ export const authorsTableData = [
     date: "24/12/08",
   },
   {
-    img: "/img/bruce-mars.jpeg",
+    img: "/img/default-avatar.jpg",
     name: "Bruce Mars",
     email: "bruce@creative-tim.com",
     job: ["Manager", "Executive"],

@@ -19,11 +19,11 @@ export function Profile() {
     const displayPosition = (id) => {
         switch (id) {
             case 0:
-                return 'CEO / Co-Founder';
+                return 'Quản trị viên';
             case 1:
-                return 'Manager';
+                return 'Quản lý';
             case 2:
-                return 'Employee';
+                return 'Nhân viên';
             default:
                 return 'Unknown';
         }
@@ -40,8 +40,8 @@ export function Profile() {
                         <div className="flex items-center gap-6">
                             <div className="group relative overflow-hidden rounded-full">
                                 <Avatar
-                                    src={user?.avatar.secure_url || '/img/bruce-mars.jpeg'}
-                                    alt="bruce-mars"
+                                    src={user?.avatar.secure_url ? user?.avatar.secure_url : '/img/default-avatar.jpg'}
+                                    alt={user?.name}
                                     size="xxl"
                                     withBorder={true}
                                     color="green"

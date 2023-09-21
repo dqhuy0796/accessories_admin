@@ -1,24 +1,23 @@
+import { Login } from '@/pages/auth';
 import {
     Home,
-    ProductCreate,
     ProductDetails,
+    ProductEditor,
     Products,
+    Profile,
+    ProfileUpdate,
     Tables,
-    UserCreate,
     UserDetails,
     UserUpdate,
-    Users
+    Users,
 } from '@/pages/dashboard';
 import {
     ArchiveBoxIcon,
     HomeIcon,
     TableCellsIcon,
     UserCircleIcon,
-    UserIcon
+    UserIcon,
 } from '@heroicons/react/24/solid';
-import ProfileUpdate from './pages/dashboard/profile/update-profile';
-import Profile from './pages/dashboard/profile/profile';
-import { Login } from './pages/auth';
 
 const icon = {
     className: 'w-5 h-5 text-inherit',
@@ -68,7 +67,7 @@ export const routes = [
                     },
                     {
                         path: '/user/create',
-                        element: <UserCreate />,
+                        element: <UserUpdate />,
                     },
                     {
                         path: '/user/detail/:username',
@@ -98,7 +97,7 @@ export const routes = [
                     },
                     {
                         path: '/product/create',
-                        element: <ProductCreate />,
+                        element: <ProductEditor />,
                     },
                     {
                         path: '/product/detail/:id',
@@ -106,7 +105,7 @@ export const routes = [
                     },
                     {
                         path: '/product/update/:id',
-                        element: <ProductCreate />,
+                        element: <ProductEditor />,
                     },
                 ],
             },

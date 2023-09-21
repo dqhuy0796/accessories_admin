@@ -4,7 +4,16 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { memo, useEffect, useRef, useState } from 'react';
 
-export function CustomSelectOption({ type, variant, value, options, onSelect, disabled, readonly, loading }) {
+export function CustomSelectOption({
+    type,
+    variant,
+    value,
+    options,
+    onSelect,
+    disabled,
+    readOnly,
+    loading,
+}) {
     const [isOpen, setOpen] = useState(false);
     const [text, setText] = useState('');
     const [data, setData] = useState([]);
@@ -72,17 +81,32 @@ export function CustomSelectOption({ type, variant, value, options, onSelect, di
         }
     };
 
+    const nothingHappen = () => {};
+
     return (
         <div className="w-full">
-            <div className={`custom-select-option ${disabled ? 'select-none' : null} ${isOpen ? 'open' : null}`}>
-                <div className={`select ${value ? '!border-t-transparent' : null} `} onClick={handleOpen}>
+            <div
+                className={`custom-select-option ${disabled ? 'select-none' : null} ${
+                    isOpen ? 'open' : null
+                }`}
+            >
+                <div
+                    className={`select ${value ? '!border-t-transparent' : null} `}
+                    onClick={readOnly ? nothingHappen : handleOpen}
+                >
                     <div className="absolute top-2/4 left-3 -translate-y-2/4 pt-0.5">
                         <span>{value}</span>
                     </div>
 
-                    <label className={`label ${value || isOpen ? 'minimize' : 'text-sm leading-[4.1]'}`}>
+                    <label
+                        className={`label ${
+                            value || isOpen ? 'minimize' : 'text-sm leading-[4.1]'
+                        }`}
+                    >
                         {variant.label}
-                        {variant.required && <span className={'ml-1 font-semibold text-red-400'}>*</span>}
+                        {variant.required && (
+                            <span className={'ml-1 font-semibold text-red-400'}>*</span>
+                        )}
                     </label>
 
                     <div
@@ -127,7 +151,9 @@ export function CustomSelectOption({ type, variant, value, options, onSelect, di
                                     <li
                                         key={item.name}
                                         className="option-item"
-                                        onClick={() => handleSelect(item?.name_with_type || item.name)}
+                                        onClick={() =>
+                                            handleSelect(item?.name_with_type || item.name)
+                                        }
                                     >
                                         <span>{item?.name_with_type || item.name}</span>
                                     </li>
@@ -156,7 +182,7 @@ CustomSelectOption.propTypes = {
     options: PropTypes.array,
     onSelect: PropTypes.func,
     disabled: PropTypes.bool,
-    readonly: PropTypes.bool,
+    readOnly: PropTypes.bool,
     loading: PropTypes.bool,
 };
 

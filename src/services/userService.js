@@ -3,10 +3,12 @@ import store from '../redux/store';
 
 /** USER */
 
-export const getRolesService = async () => {
+export const getRolesService = async (role_id) => {
     const path = 'role/get';
     const accessToken = store.getState().user.accessToken;
-    const payload = {};
+    const payload = {
+        role_id,
+    };
 
     try {
         const result = await authorizationRequest.getApi(path, payload, accessToken);
@@ -16,11 +18,27 @@ export const getRolesService = async () => {
     }
 };
 
-export const getUsersService = async (role_id, page) => {
+export const getUsersCountService = async (role_id) => {
+    const path = 'user/count';
+
+    const payload = {
+        role_id,
+    };
+
+    try {
+        const result = await authorizationRequest.getApi(path, payload);
+        return result;
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+export const getUsersService = async (role_id, slug, page) => {
     const path = 'user/get';
     const accessToken = store.getState().user.accessToken;
     const payload = {
         role_id,
+        slug,
         page,
     };
 

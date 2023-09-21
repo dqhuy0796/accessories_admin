@@ -1,11 +1,10 @@
 import { imageService } from '@/services';
 import { PencilIcon } from '@heroicons/react/24/solid';
-import { Avatar, Button, IconButton } from '@material-tailwind/react';
+import { Avatar, IconButton } from '@material-tailwind/react';
 import PropTypes from 'prop-types';
 import { memo } from 'react';
-import 'react-toastify/dist/ReactToastify.css';
 
-export function CustomAvatarUpdate({ avatar, readOnly, onChangeAvatar }) {
+export function CustomAvatarUpload({ avatar, readOnly, onChangeAvatar }) {
     const handleCloudinaryRollback = async (public_id) => {
         const destroyImages = [{ public_id }];
         const response = await imageService.rollbackCloudUpload(destroyImages);
@@ -20,7 +19,7 @@ export function CustomAvatarUpdate({ avatar, readOnly, onChangeAvatar }) {
         window.cloudinary.openUploadWidget(
             {
                 cloudName: import.meta.env.VITE_CLOUDINARY_NAME,
-                uploadPreset: import.meta.env.VITE_CLOUDINARY_PRESET,
+                uploadPreset: import.meta.env.VITE_CLOUDINARY_CROP_PRESET,
                 cropping: true,
                 croppingAspectRatio: 1,
                 croppingShowDimensions: true,
@@ -42,7 +41,7 @@ export function CustomAvatarUpdate({ avatar, readOnly, onChangeAvatar }) {
     return (
         <div className="group relative overflow-hidden rounded-full">
             <Avatar
-                src={avatar?.secure_url || '/img/bruce-mars.jpeg'}
+                src={avatar?.secure_url || '/img/default-avatar.jpg'}
                 alt="bruce-mars"
                 withBorder={true}
                 color="green"
@@ -62,10 +61,10 @@ export function CustomAvatarUpdate({ avatar, readOnly, onChangeAvatar }) {
     );
 }
 
-CustomAvatarUpdate.propTypes = {
+CustomAvatarUpload.propTypes = {
     avatar: PropTypes.object,
     readOnly: PropTypes.bool,
     onChangeAvatar: PropTypes.func,
 };
 
-export default memo(CustomAvatarUpdate);
+export default memo(CustomAvatarUpload);

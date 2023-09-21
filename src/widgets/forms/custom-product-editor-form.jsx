@@ -4,7 +4,7 @@ import { Input } from '@material-tailwind/react';
 import _ from 'lodash';
 import { memo, useEffect, useState } from 'react';
 
-function ProductForm({ data, onChange }) {
+function CustomProductEditorForm({ data, onChange }) {
     const [isLoading, setLoading] = useState(false);
     const [categories, setCategories] = useState([]);
     const [materials, setMaterials] = useState([]);
@@ -116,4 +116,4 @@ function ProductForm({ data, onChange }) {
     );
 }
 
-export default memo(ProductForm);
+export default memo(CustomProductEditorForm);

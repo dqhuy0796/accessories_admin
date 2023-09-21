@@ -163,7 +163,7 @@ export function AddressSelection({ address, onChange }) {
                         key: 'province',
                         label: 'Tỉnh/Thành phố TW',
                     }}
-                    value={address.province}
+                    value={address?.province}
                     loading={isLoading && _.isEmpty(provinces)}
                     onSelect={handleProvinceChange}
                 />
@@ -173,7 +173,7 @@ export function AddressSelection({ address, onChange }) {
                         key: 'district',
                         label: 'Huyện/Quận/TX/TP',
                     }}
-                    value={address.district}
+                    value={address?.district}
                     loading={isLoading && _.isEmpty(districts) && !_.isEmpty(address.province)}
                     onSelect={handleDistrictChange}
                 />
@@ -183,7 +183,7 @@ export function AddressSelection({ address, onChange }) {
                         key: 'ward',
                         label: 'Xã/Phường/Thị trấn',
                     }}
-                    value={address.ward}
+                    value={address?.ward}
                     loading={isLoading && _.isEmpty(wards) && !_.isEmpty(address.district)}
                     onSelect={handleWardChange}
                 />
@@ -192,7 +192,7 @@ export function AddressSelection({ address, onChange }) {
                         size="lg"
                         color="blue"
                         label="Địa chỉ"
-                        value={address.location || ''}
+                        value={address?.location || ''}
                         onChange={handleAddressChange}
                         required
                     />

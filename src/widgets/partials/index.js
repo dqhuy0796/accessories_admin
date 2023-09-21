@@ -1,6 +1,5 @@
 export * from '@/widgets/partials/user-details-item';
 export * from '@/widgets/partials/address-selection';
-export * from '@/widgets/partials/custom-table-menu';
 export * from '@/widgets/partials/custom-select-option';
 export * from '@/widgets/partials/custom-confirm-dialog';
 export * from '@/widgets/partials/custom-crud-menu';

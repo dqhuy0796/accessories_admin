@@ -2,18 +2,33 @@ import { Avatar, Button, Input } from '@material-tailwind/react';
 import PropTypes from 'prop-types';
 import { AddressSelection, CustomEditor, CustomSelectOption, UserDetailsItem } from '../partials';
 import CustomAvatarUpload from '../partials/custom-avatar-upload';
+import { useEffect, useState } from 'react';
+import { userService } from '@/services';
+import { useSelector } from 'react-redux';
 
-export function UserEditorForm({ data, onChange }) {
-    const displayPosition = (id) => {
-        switch (id) {
-            case 0:
-                return 'CEO / Co-Founder';
-            case 1:
-                return 'Manager';
-            case 2:
-                return 'Employee';
-            default:
-                return 'Unknown';
+export function CustomUserEditorForm({ data, isCreate, onChange }) {
+    const [isLoading, setLoading] = useState(false);
+    const [roles, setRoles] = useState([]);
+    const { role_id } = useSelector((state) => state.user.data);
+
+    useEffect(() => {
+        const handleGetRoles = async () => {
+            setLoading(true);
+            const response = await userService.getRolesService(role_id);
+            if (response && response.code === 'SUCCESS') {
+                setRoles(response.result);
+            }
+            setLoading(false);
+        };
+        handleGetRoles();
+    }, []);
+
+    /**EVENT HANDLER */
+    const handleOnSelectRole = (value) => {
+        const result = roles.find((item) => item.name === value);
+        if (result && result.name !== data.role) {
+            onChange('role', result.name);
+            onChange('role_id', result.id);
         }
     };
     const handleOnChangeAddress = (key, value) => {
@@ -57,10 +72,12 @@ export function UserEditorForm({ data, onChange }) {
                     label: 'Họ tên',
                 },
                 {
-                    key: 'role_id',
+                    key: 'role',
                     type: 'select',
                     label: 'Loại tài khoản',
-                    readonly: true,
+                    options: roles,
+                    onSelect: handleOnSelectRole,
+                    readOnly: true,
                 },
                 {
                     key: 'birth',
@@ -76,19 +93,19 @@ export function UserEditorForm({ data, onChange }) {
                     key: 'phone_number',
                     type: 'tel',
                     label: 'Số điện thoại',
-                    readonly: true,
+                    readOnly: true,
                 },
                 {
                     key: 'email',
                     type: 'email',
                     label: 'Email',
-                    readonly: true,
+                    readOnly: true,
                 },
                 {
                     key: 'password',
                     type: 'password',
                     label: 'Mật khẩu',
-                    readonly: true,
+                    readOnly: true,
                 },
             ],
         },
@@ -110,9 +127,11 @@ export function UserEditorForm({ data, onChange }) {
                             item.type === 'select' ? (
                                 <CustomSelectOption
                                     key={item.key}
+                                    options={isLoading ? [] : item?.options}
                                     variant={{ label: item.label }}
-                                    value={displayPosition(data[item.key]) || ''}
-                                    readonly={item.readonly ? true : false}
+                                    value={data[item.key] ?? ''}
+                                    onSelect={(value) => item.onSelect(value)}
+                                    readOnly={item.readOnly && !isCreate ? true : false}
                                 />
                             ) : (
                                 <Input
@@ -121,9 +140,9 @@ export function UserEditorForm({ data, onChange }) {
                                     color="blue"
                                     type={item.type}
                                     label={item.label}
-                                    value={data[item.key] || ''}
+                                    value={data[item.key] ?? ''}
                                     onChange={(e) => onChange(item.key, e.target.value)}
-                                    readOnly={item.readonly ? true : false}
+                                    readOnly={item.readOnly && !isCreate ? true : false}
                                 />
                             ),
                         )}
@@ -132,11 +151,11 @@ export function UserEditorForm({ data, onChange }) {
                     <div key={index} className="grid gap-6 lg:col-span-2">
                         {items.map((item) => (
                             <div key={item.key} className="flex items-end justify-between gap-2">
-                                {item.readonly ? (
+                                {item.readOnly && !isCreate ? (
                                     <>
                                         <UserDetailsItem
                                             label={item.label}
-                                            text={data[item.key] || 'Unknown'}
+                                            text={data[item.key] ? data[item.key] : 'unknown'}
                                             encrypt={item.key}
                                         />
                                         <Button
@@ -155,13 +174,9 @@ export function UserEditorForm({ data, onChange }) {
                                         color="blue"
                                         type={item.type}
                                         label={item.label}
-                                        value={
-                                            item.type === 'password'
-                                                ? 'password'
-                                                : data[item.key] || ''
-                                        }
-                                        onChange={() => {}}
-                                        readOnly={item.readonly ? true : false}
+                                        value={data[item.key] ?? ''}
+                                        onChange={(e) => onChange(item.key, e.target.value)}
+                                        readOnly={item.readOnly && !isCreate ? true : false}
                                     />
                                 )}
                             </div>
@@ -178,11 +193,12 @@ export function UserEditorForm({ data, onChange }) {
     );
 }
 
-UserEditorForm.defaultProps = {};
+CustomUserEditorForm.defaultProps = {};
 
-UserEditorForm.propTypes = {
+CustomUserEditorForm.propTypes = {
     data: PropTypes.object,
+    isCreate: PropTypes.bool,
     onChange: PropTypes.func,
 };
 
-export default UserEditorForm;
+export default CustomUserEditorForm;

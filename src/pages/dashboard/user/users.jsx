@@ -1,5 +1,5 @@
-import { dataService, productService } from '@/services';
-import { CustomConfirmDialog, CustomCrudMenu, CustomTableMenu } from '@/widgets/partials';
+import { userService } from '@/services';
+import { CustomConfirmDialog, CustomCrudMenu, CustomPagination } from '@/widgets/partials';
 import {
     ArrowsUpDownIcon,
     CheckCircleIcon,
@@ -9,11 +9,12 @@ import {
     PlusIcon,
 } from '@heroicons/react/24/solid';
 import {
+    Avatar,
     Button,
     Card,
     CardBody,
+    CardFooter,
     CardHeader,
-    Checkbox,
     Chip,
     Collapse,
     Input,
@@ -21,9 +22,11 @@ import {
     MenuHandler,
     MenuItem,
     MenuList,
+    Radio,
     Typography,
 } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 export function Users() {
@@ -35,13 +38,18 @@ export function Users() {
     const [totalPages, setTotalPages] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
     const [filterMenu, setFilterMenu] = useState([]);
-    const [filteredCategories, setFilteredCategories] = useState([]);
+    const [filteredRole, setFilteredRole] = useState('all');
     const [dialog, setDialog] = useState({
         title: 'Xóa tài khoản',
         text: 'Xác nhận xóa tài khoản?',
     });
     const navigate = useNavigate();
+    const currentUser = useSelector((state) => state.user.data);
     const dataTable = [
+        {
+            title: 'họ tên',
+            key: 'name',
+        },
         {
             title: 'số điện thoại',
             key: 'phone_number',
@@ -50,10 +58,6 @@ export function Users() {
         {
             title: 'email',
             key: 'email',
-        },
-        {
-            title: 'họ tên',
-            key: 'name',
         },
         {
             title: 'địa chỉ',
@@ -65,19 +69,23 @@ export function Users() {
         },
     ];
 
-    const handleGetUsers = async () => {
+    const handleGetUsers = async (role_id, slug, page) => {
         setLoading(true);
-        const response = await dataService.getUsersService();
+        const response = await userService.getUsersService(role_id, slug, page);
 
         if (response && response.code === 'SUCCESS') {
-            setUsers(response.result);
+            const { page, total_pages, total_results, result } = response;
+            setUsers(result);
+            setCurrentPage(Number(page));
+            setTotalPages(Number(total_pages));
+            setTotalResults(Number(total_results));
         }
         setLoading(false);
     };
 
     const handleGetProductsCount = async () => {
         setLoading(true);
-        const response = await productService.getProductsCountService();
+        const response = await userService.getUsersCountService(currentUser.role_id);
         if (response && response.code === 'SUCCESS') {
             setFilterMenu(response.result);
         }
@@ -95,8 +103,8 @@ export function Users() {
     }, []);
 
     useEffect(() => {
-        handleGetUsers();
-    }, []);
+        handleGetUsers(currentUser?.role_id, filteredRole, currentPage);
+    }, [filteredRole, currentPage]);
 
     /** DATA SUBMIT HANDLER */
 
@@ -110,7 +118,7 @@ export function Users() {
 
             const response = await new Promise((resolve) => {
                 setTimeout(async () => {
-                    const result = await dataService.deleteUserService(data);
+                    const result = await userService.deleteUserService(data);
                     resolve(result);
                 }, 2000);
             });
@@ -164,31 +172,28 @@ export function Users() {
     const handleRedirectToCreate = () => {
         navigate(`/dashboard/user/create`);
     };
+
     const handleRedirectToPreview = (username) => {
         navigate(`/dashboard/user/detail/${username}`);
     };
+
     const handleRedirectToUpdate = (username) => {
         navigate(`/dashboard/user/update/${username}`);
     };
+
     const handleToggleFilter = () => {
         setOpenFilter((prevOpen) => !prevOpen);
     };
+
     const handleToggleSorter = () => {
         setOpenSorter((prevOpen) => !prevOpen);
     };
+    
+    const handleOnChangePagination = (value) => {
+        setCurrentPage(value);
+    };
+
     /** FILTER */
-
-    const handleOnFilterCategories = (value) => {
-        const isValueSelected = filteredCategories.includes(value);
-        const newOption = isValueSelected
-            ? filteredCategories.filter((item) => item !== value)
-            : [...filteredCategories, value];
-        setFilteredCategories(newOption);
-    };
-
-    const handleResetFilteredCategories = () => {
-        setFilteredCategories([]);
-    };
 
     /**SORTER */
 
@@ -221,7 +226,7 @@ export function Users() {
                                 onClick={handleRedirectToCreate}
                             >
                                 <PlusIcon className="h-4 w-4" />
-                                <span>Sản phẩm mới</span>
+                                <span>Tài khoản mới</span>
                             </Button>
 
                             <Button
@@ -251,40 +256,38 @@ export function Users() {
                     <Collapse open={openFilter}>
                         <div className="mt-4 rounded-lg border border-blue-gray-100 p-4">
                             <Typography className="ml-2 mb-2 text-sm font-semibold">
-                                Danh mục
+                                Phân quyền
                             </Typography>
                             <div className="grid grid-cols-2 gap-x-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                                <Checkbox
+                                <Radio
                                     color="blue"
-                                    value={'all'}
+                                    name="role"
+                                    value="all"
                                     label={
                                         <span className="text-xs font-medium">
-                                            {`Tất cả (${filterMenu.reduce((sum, product) => {
-                                                return sum + Number(product.product_count);
+                                            {`Tất cả (${filterMenu.reduce((sum, user) => {
+                                                return sum + Number(user.user_count);
                                             }, 0)})`}
                                         </span>
                                     }
-                                    checked={filteredCategories.length === 0 ? true : false}
-                                    onChange={handleResetFilteredCategories}
+                                    checked={filteredRole === 'all'}
+                                    onChange={() => setFilteredRole('all')}
                                 />
                                 {filterMenu &&
                                     filterMenu.length > 0 &&
                                     filterMenu.map((item) => (
-                                        <Checkbox
+                                        <Radio
                                             color="blue"
+                                            name="role"
                                             key={item.id}
                                             value={item.slug}
                                             label={
                                                 <span className="text-xs font-medium line-clamp-1">
-                                                    {`${item.name} (${item.product_count})`}
+                                                    {`${item.name} (${item.user_count})`}
                                                 </span>
                                             }
-                                            checked={
-                                                filteredCategories.includes(item.slug)
-                                                    ? true
-                                                    : false
-                                            }
-                                            onChange={() => handleOnFilterCategories(item.slug)}
+                                            checked={filteredRole === item.slug}
+                                            onChange={() => setFilteredRole(item.slug)}
                                         />
                                     ))}
                             </div>
@@ -355,15 +358,30 @@ export function Users() {
                                                             value={item[col.key]}
                                                             className="w-max py-px text-xs"
                                                         />
+                                                    ) : col.key === 'name' ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <Avatar
+                                                                size="sm"
+                                                                withBorder
+                                                                color="blue-gray"
+                                                                alt={item[col.key]}
+                                                                src={
+                                                                    item.avatar_url ??
+                                                                    '/img/default-avatar.jpg'
+                                                                }
+                                                                className="border p-px"
+                                                            />
+                                                            <Typography className="whitespace-nowrap font-semibold">
+                                                                {item[col.key]}
+                                                            </Typography>
+                                                        </div>
                                                     ) : (
                                                         <Typography
                                                             className={`${
                                                                 col.key === 'address'
                                                                     ? 'min-w-[240px] line-clamp-1'
-                                                                    : col.key === 'name'
-                                                                    ? 'whitespace-nowrap font-medium'
                                                                     : 'whitespace-nowrap italic'
-                                                            }`}
+                                                            } font-medium text-gray-500`}
                                                         >
                                                             {item[col.key]}
                                                         </Typography>
@@ -397,6 +415,29 @@ export function Users() {
                         </table>
                     </div>
                 </CardBody>
+                <CardFooter className="pt-0 pb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-4 md:flex-nowrap">
+                        <Typography color="gray" className="flex gap-1 text-sm">
+                            <strong className="font-semibold text-gray-900">
+                                {currentPage * 12 - 11}
+                            </strong>
+                            <span>-</span>
+                            <strong className="font-semibold text-gray-900">
+                                {currentPage * 12 < totalResults ? currentPage * 12 : totalResults}
+                            </strong>
+                            <span>of</span>
+                            <strong className="font-semibold text-gray-900">
+                                {totalResults * 1}
+                            </strong>
+                        </Typography>
+
+                        <CustomPagination
+                            current={currentPage}
+                            total={totalPages}
+                            onPagination={handleOnChangePagination}
+                        />
+                    </div>
+                </CardFooter>
             </Card>
 
             <CustomConfirmDialog {...dialog} />

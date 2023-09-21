@@ -36,7 +36,7 @@ export const productsTableData = [
         status: 'in stock',
     },
     {
-        img: '/img/bruce-mars.jpeg',
+        img: '/img/default-avatar.jpg',
         name: 'Bruce Mars',
         category: 'khăn lụa',
         quantity: 1000,

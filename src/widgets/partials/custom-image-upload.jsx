@@ -45,7 +45,7 @@ export function CustomImageUpload({ slug, images, feature, onChangeImages, onCha
         window.cloudinary.openUploadWidget(
             {
                 cloudName: import.meta.env.VITE_CLOUDINARY_NAME,
-                uploadPreset: import.meta.env.VITE_CLOUDINARY_PRESET,
+                uploadPreset: import.meta.env.VITE_CLOUDINARY_ORIGIN_PRESET,
                 clientAllowedFormats: ['image'],
                 maxImageFileSize: 5000000,
             },

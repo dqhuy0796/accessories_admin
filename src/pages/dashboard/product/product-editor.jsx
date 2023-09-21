@@ -1,4 +1,5 @@
 import { imageService, productService } from '@/services';
+import CustomProductEditorForm from '@/widgets/forms/custom-product-editor-form';
 import { CustomConfirmDialog, CustomCrudGroupButtons, CustomImageUpload } from '@/widgets/partials';
 import {
     Card,
@@ -14,9 +15,8 @@ import {
 import _ from 'lodash';
 import { memo, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import ProductForm from './product-form';
 
-export function ProductCreate() {
+export function ProductEditor() {
     const [activeTab, setActiveTab] = useState('general');
     const [updatable, setUpdatable] = useState(false);
     const [productData, setProductData] = useState({});
@@ -279,7 +279,7 @@ export function ProductCreate() {
     /** EVENT HANDLER */
 
     /** 1. onChange */
-    
+
     const genarateSlug = (str) => {
         return str
             .toLowerCase()
@@ -436,7 +436,10 @@ export function ProductCreate() {
 
                         <TabsBody>
                             <TabPanel className="min-h-max px-0" key={'general'} value={'general'}>
-                                <ProductForm data={productData} onChange={handleOnChange} />
+                                <CustomProductEditorForm
+                                    data={productData}
+                                    onChange={handleOnChange}
+                                />
                             </TabPanel>
 
                             <TabPanel className="min-h-max px-0" key={'images'} value={'images'}>
@@ -505,4 +508,4 @@ export function ProductCreate() {
     );
 }
 
-export default memo(ProductCreate);
+export default memo(ProductEditor);

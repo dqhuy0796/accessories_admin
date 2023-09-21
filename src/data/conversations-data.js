@@ -20,7 +20,7 @@ export const conversationsData = [
     message: "Have a great afternoon...",
   },
   {
-    img: "/img/bruce-mars.jpeg",
+    img: "/img/default-avatar.jpg",
     name: "Bruce Mars",
     message: "Hi! I need more information...",
   },

@@ -56,7 +56,7 @@ export function ProfileInfoCard({ data, action }) {
                                 </div>
                             ) : (
                                 <Typography variant="small" className="font-normal">
-                                    {data[item.key] ? data[item.key] : ''}
+                                    {data[item.key] ?? ''}
                                 </Typography>
                             )}
                         </li>

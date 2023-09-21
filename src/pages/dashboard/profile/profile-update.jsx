@@ -1,6 +1,6 @@
 import { updateProfile } from '@/redux/actions/userAction';
 import { authService } from '@/services';
-import { UserEditorForm } from '@/widgets/layout';
+import { CustomUserEditorForm } from '@/widgets/forms';
 import { CustomConfirmDialog, CustomCrudGroupButtons } from '@/widgets/partials';
 import { Card, CardBody, CardFooter } from '@material-tailwind/react';
 import _ from 'lodash';
@@ -121,6 +121,7 @@ export function ProfileUpdate() {
                 setDialog((prevState) => ({
                     ...prevState,
                     status: 'ERROR',
+                    btnConfirm: 'Thử lại',
                     text: 'Cập nhật thông tin không thành công!',
                 }));
             }
@@ -128,6 +129,7 @@ export function ProfileUpdate() {
             setDialog((prevState) => ({
                 ...prevState,
                 status: 'ERROR',
+                btnConfirm: 'Thử lại',
                 text: error?.message || error || 'Cập nhật thông tin không thành công!',
             }));
         }
@@ -181,7 +183,7 @@ export function ProfileUpdate() {
             <Card className="-mt-16 mb-6 border-b border-blue-gray-100">
                 <CardBody className="p-4">
                     {!_.isEmpty(profile) && (
-                        <UserEditorForm data={profile} onChange={handleOnChangeInput} />
+                        <CustomUserEditorForm data={profile} onChange={handleOnChangeInput} />
                     )}
                 </CardBody>
                 <CardFooter>
