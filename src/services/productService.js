@@ -76,11 +76,10 @@ export const getProductByIdService = async (product_id) => {
 
 /** AUTHORIZATION */
 
-const accessToken = store.getState().user.accessToken;
 
 export const createProductService = async (data) => {
     const path = 'product/create';
-
+    const accessToken = store.getState().user.accessToken;
     const payload = data;
 
     try {
@@ -93,7 +92,7 @@ export const createProductService = async (data) => {
 
 export const updateProductService = async (data) => {
     const path = 'product/update';
-
+    const accessToken = store.getState().user.accessToken;
     const payload = data;
 
     try {
@@ -106,7 +105,7 @@ export const updateProductService = async (data) => {
 
 export const deleteProductService = async (data) => {
     const path = 'product/delete';
-
+    const accessToken = store.getState().user.accessToken;
     const payload = data;
 
     try {
