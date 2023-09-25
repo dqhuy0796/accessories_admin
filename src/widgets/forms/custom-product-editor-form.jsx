@@ -2,7 +2,7 @@ import { productService } from '@/services';
 import { CustomEditor, CustomSelectOption } from '@/widgets/partials';
 import { Input } from '@material-tailwind/react';
 import _ from 'lodash';
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function CustomProductEditorForm({ data, onChange }) {
     const [isLoading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ function CustomProductEditorForm({ data, onChange }) {
     }, []);
 
     return (
-        <form action='#' className="grid gap-4">
+        <form action="#" className="grid gap-4">
             <div className="grid gap-4 md:col-span-2">
                 <Input
                     size="lg"
@@ -51,6 +51,7 @@ function CustomProductEditorForm({ data, onChange }) {
                     required
                     value={data.slug || ''}
                     onChange={(e) => onChange('slug', e.target.value)}
+                    readOnly
                 />
             </div>
             <div className="grid gap-4 sm:grid-cols-2 md:col-span-2 md:grid-cols-3">
@@ -110,10 +111,13 @@ function CustomProductEditorForm({ data, onChange }) {
                 />
             </div>
             <div className="grid md:col-span-2">
-                <CustomEditor value={data.description} onChange={(value) => onChange('description', value)} />
+                <CustomEditor
+                    value={data.description}
+                    onChange={(value) => onChange('description', value)}
+                />
             </div>
         </form>
     );
 }
 
-export default memo(CustomProductEditorForm);
+export default CustomProductEditorForm;
