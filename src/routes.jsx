@@ -1,6 +1,9 @@
 import { Login } from '@/pages/auth';
 import {
     Home,
+    OrderDetails,
+    OrderEditor,
+    Orders,
     ProductDetails,
     ProductEditor,
     Products,
@@ -8,7 +11,7 @@ import {
     ProfileUpdate,
     Tables,
     UserDetails,
-    UserUpdate,
+    UserEditor,
     Users,
 } from '@/pages/dashboard';
 import {
@@ -67,7 +70,7 @@ export const routes = [
                     },
                     {
                         path: '/user/create',
-                        element: <UserUpdate />,
+                        element: <UserEditor />,
                     },
                     {
                         path: '/user/detail/:username',
@@ -75,15 +78,33 @@ export const routes = [
                     },
                     {
                         path: '/user/update/:username',
-                        element: <UserUpdate />,
+                        element: <UserEditor />,
                     },
                 ],
             },
             {
-                icon: <TableCellsIcon {...icon} />,
-                name: 'khách hàng',
-                path: '/customers',
-                element: <Tables />,
+                icon: <UserIcon {...icon} />,
+                name: 'Đơn hàng',
+                path: '/order',
+                element: <Orders />,
+                routes: [
+                    {
+                        path: '/order',
+                        element: <Orders />,
+                    },
+                    {
+                        path: '/order/create',
+                        element: <OrderEditor />,
+                    },
+                    {
+                        path: '/order/detail/:username',
+                        element: <OrderDetails />,
+                    },
+                    {
+                        path: '/order/update/:username',
+                        element: <OrderEditor />,
+                    },
+                ],
             },
             {
                 icon: <ArchiveBoxIcon {...icon} />,

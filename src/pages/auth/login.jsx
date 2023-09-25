@@ -52,8 +52,8 @@ export function Login() {
     return (
         <div className="grid min-h-screen md:grid-cols-2">
             <img
-                src="https://images.unsplash.com/photo-1497294815431-9365093b7331?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1950&q=80"
-                className="hidden h-full w-full object-cover md:block"
+                src="https://www.junie.vn/cdn/shop/files/NonSale_HP_Hero_5-16_5-23_Desktop.jpg?v=1684537968&width=3000"
+                className="hidden h-full w-full object-cover object-left md:block"
             />
             <div className="grid w-full place-items-center">
                 <Card className="shadow-none">

@@ -1,27 +1,27 @@
 import { userService } from '@/services';
-import { CustomUserEditorForm } from '@/widgets/forms';
+import { CustomOrderEditorForm, CustomUserEditorForm } from '@/widgets/forms';
 import { CustomConfirmDialog, CustomCrudGroupButtons } from '@/widgets/partials';
 import { Card, CardBody, CardFooter, Typography } from '@material-tailwind/react';
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-export function UserEditor() {
+export function OrderEditor() {
     const [isLoading, setLoading] = useState(false);
     const [updatable, setUpdatable] = useState(false);
-    const [userData, setUserData] = useState({ address: {} });
+    const [orderData, setUserData] = useState({ address: {} });
     const [defaultData, setDefaultData] = useState({ address: {} });
     const [dialog, setDialog] = useState({
-        title: 'Cập nhật thông tin tài khoản',
-        text: 'Xác nhận cập nhật thông tin tài khoản?',
+        title: 'Cập nhật thông tin đơn hàng',
+        text: 'Xác nhận cập nhật thông tin đơn hàng?',
     });
     const navigate = useNavigate();
-    const { username } = useParams();
+    const { orderuuid } = useParams();
 
     useEffect(() => {
-        const handleGetUserByUsername = async (username) => {
+        const handleGetUserByUsername = async (orderuuid) => {
             setLoading(true);
-            const response = await userService.getUserByUsernameService(username);
+            const response = await userService.getUserByUsernameService(orderuuid);
             if (response && response.code === 'SUCCESS') {
                 const birth = handleFormatDate(response.result.birth);
                 const address = handleConvertAddress(response.result.address);
@@ -39,20 +39,20 @@ export function UserEditor() {
             setLoading(false);
         };
 
-        if (username) {
-            handleGetUserByUsername(username);
+        if (orderuuid) {
+            handleGetUserByUsername(orderuuid);
         }
-    }, [username]);
+    }, [orderuuid]);
 
     useEffect(() => {
-        if (_.isEqual(userData, defaultData)) {
+        if (_.isEqual(orderData, defaultData)) {
             setUpdatable(false);
         } else {
             setUpdatable(true);
         }
 
         return () => setUpdatable(false);
-    }, [userData]);
+    }, [orderData]);
 
     const handleFormatDate = (date) => {
         const localeDate = new Date(date);
@@ -106,8 +106,8 @@ export function UserEditor() {
             ...prevState,
             open: true,
             status: 'READY',
-            title: 'Tạo mới tài khoản',
-            text: 'Xác nhận tạo mới tài khoản?',
+            title: 'Tạo mới đơn hàng',
+            text: 'Xác nhận tạo mới đơn hàng?',
             handler: handleCloseDialog,
             btnCancel: 'Hủy',
             onCancel: handleCloseDialog,
@@ -117,7 +117,7 @@ export function UserEditor() {
     };
     const handleSubmitCreateUser = (e) => {
         e.preventDefault();
-        handleCreateUser(userData);
+        handleCreateUser(orderData);
     };
     const handleCreateUser = async (data) => {
         try {
@@ -140,8 +140,8 @@ export function UserEditor() {
                 setDialog((prevState) => ({
                     ...prevState,
                     status: 'SUCCESS',
-                    text: `Tạo mới tài khoản thành công!`,
-                    btnCancel: 'Tạo thêm tài khoản',
+                    text: `Tạo mới đơn hàng thành công!`,
+                    btnCancel: 'Tạo thêm đơn hàng',
                     btnConfirm: 'Đến trang quản lý',
                     onConfirm: handleRedirectToManagerPage,
                 }));
@@ -149,7 +149,7 @@ export function UserEditor() {
                 setDialog((prevState) => ({
                     ...prevState,
                     status: 'ERROR',
-                    text: 'Tạo mới tài khoản không thành công!',
+                    text: 'Tạo mới đơn hàng không thành công!',
                     btnConfirm: 'Thử lại',
                 }));
             }
@@ -158,7 +158,7 @@ export function UserEditor() {
                 ...prevState,
                 status: 'ERROR',
                 btnConfirm: 'Thử lại',
-                text: error?.message || error || 'Tạo mới tài khoản không thành công!',
+                text: error?.message || error || 'Tạo mới đơn hàng không thành công!',
             }));
         }
     };
@@ -169,8 +169,8 @@ export function UserEditor() {
             ...prevState,
             open: true,
             status: 'READY',
-            title: 'Cập nhật tài khoản',
-            text: 'Xác nhận cập nhật tài khoản?',
+            title: 'Cập nhật đơn hàng',
+            text: 'Xác nhận cập nhật đơn hàng?',
             handler: handleCloseDialog,
             btnCancel: 'Hủy',
             onCancel: handleCloseDialog,
@@ -180,7 +180,7 @@ export function UserEditor() {
     };
     const handleSubmitUpdateUser = (e) => {
         e.preventDefault();
-        handleUpdateUser(userData);
+        handleUpdateUser(orderData);
     };
     const handleUpdateUser = async (data) => {
         try {
@@ -240,8 +240,8 @@ export function UserEditor() {
             ...prevState,
             open: true,
             status: 'WARNING',
-            title: 'Xóa tài khoản',
-            text: 'Xác nhận xóa tài khoản này?',
+            title: 'Xóa đơn hàng',
+            text: 'Xác nhận xóa đơn hàng này?',
             handler: handleCloseDialog,
             btnCancel: 'Hủy',
             onCancel: handleCloseDialog,
@@ -251,7 +251,7 @@ export function UserEditor() {
     };
     const handleSubmitDeleteUser = (e) => {
         e.preventDefault();
-        handleDeleteUser(userData);
+        handleDeleteUser(orderData);
     };
     const handleDeleteUser = async (data) => {
         try {
@@ -292,7 +292,7 @@ export function UserEditor() {
                     ...prevState,
                     status: 'ERROR',
                     btnDelete: 'Thử lại',
-                    text: 'Xóa tài khoản không thành công!',
+                    text: 'Xóa đơn hàng không thành công!',
                 }));
             }
         } catch (error) {
@@ -300,7 +300,7 @@ export function UserEditor() {
                 ...prevState,
                 status: 'ERROR',
                 btnDelete: 'Thử lại',
-                text: error?.message || error || 'Xóa tài khoản không thành công!',
+                text: error?.message || error || 'Xóa đơn hàng không thành công!',
             }));
         }
     };
@@ -308,21 +308,21 @@ export function UserEditor() {
     return (
         <div className="my-10 flex flex-col gap-12">
             <Typography variant="h4">
-                {username ? 'Cập nhật thông tin tài khoản' : 'Tạo tài khoản mới'}
+                {orderuuid ? 'Cập nhật thông tin đơn hàng' : 'Tạo đơn hàng mới'}
             </Typography>
             <Card>
                 <CardBody className="p-4">
-                    {!_.isEmpty(userData) && (
-                        <CustomUserEditorForm
-                            data={userData}
-                            isCreate={!username}
+                    {/* {!_.isEmpty(orderData) && (
+                        <CustomOrderEditorForm
+                            data={orderData}
+                            isCreate={!orderuuid}
                             onChange={handleOnChangeInput}
                         />
-                    )}
+                    )} */}
                 </CardBody>
 
                 <CardFooter className="p-4">
-                    {username ? (
+                    {orderuuid ? (
                         <CustomCrudGroupButtons
                             btnConfirn={{
                                 text: 'Cập nhật',
@@ -358,8 +358,8 @@ export function UserEditor() {
     );
 }
 
-// UserEditor.propTypes = {
+// OrderEditor.propTypes = {
 //     data: PropTypes.object,
 // };
 
-export default UserEditor;
+export default OrderEditor;

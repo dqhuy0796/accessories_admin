@@ -3,9 +3,9 @@ import { Input } from '@material-tailwind/react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
-import { CustomSelectOption } from '.';
+import CustomSelectOption from './custom-select-option';
 
-export function AddressSelection({ address, onChange }) {
+export function CustomAddressSelection({ address, onChange }) {
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [provinces, setProvinces] = useState([]);
@@ -206,9 +206,9 @@ export function AddressSelection({ address, onChange }) {
     );
 }
 
-AddressSelection.propTypes = {
+CustomAddressSelection.propTypes = {
     address: PropTypes.object,
     onChange: PropTypes.func,
 };
 
-export default AddressSelection;
+export default CustomAddressSelection;

@@ -28,7 +28,7 @@ export function DashboardNavbar({ brandImg, brandName }) {
     return (
         <Navbar
             color="white"
-            className="sticky top-0 z-40 h-20 p-0 shadow-md shadow-blue-gray-500/5"
+            className="sticky top-0 z-40 h-20 border-b border-gray-400/50 p-0 shadow-md shadow-blue-gray-500/5"
             blurred={false}
             fullWidth
         >

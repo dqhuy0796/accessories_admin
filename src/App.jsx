@@ -9,23 +9,23 @@ function App() {
     const isLogged = useSelector((state) => state.user.isLogged);
     const refreshToken = useSelector((state) => state.user.refreshToken);
 
-    useEffect(() => {
-        const handleRefreshTokens = async () => {
-            try {
-                if (refreshToken) {
-                    dispatch(refreshTokens());
-                    console.log('refresh tokens', new Date());
-                } else {
-                    dispatch(logout());
-                }
-            } catch (error) {
-                console.log(error);
-                dispatch(logout());
-            }
-        };
+    // useEffect(() => {
+    //     const handleRefreshTokens = async () => {
+    //         try {
+    //             if (refreshToken) {
+    //                 dispatch(refreshTokens());
+    //                 console.log('refresh tokens', new Date());
+    //             } else {
+    //                 dispatch(logout());
+    //             }
+    //         } catch (error) {
+    //             console.log(error);
+    //             dispatch(logout());
+    //         }
+    //     };
 
-        handleRefreshTokens();
-    }, []);
+    //     handleRefreshTokens();
+    // }, []);
 
     return (
         <Routes>

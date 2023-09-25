@@ -48,7 +48,7 @@ export const refreshTokensService = async () => {
 };
 
 export const updateProfileService = async (data) => {
-    const path = 'auth/user/profile-update';
+    const path = 'auth/user/update-profile';
     const accessToken = store.getState().user.accessToken;
     const payload = data;
 

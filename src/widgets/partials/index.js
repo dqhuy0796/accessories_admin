@@ -10,3 +10,5 @@ export * from '@/widgets/partials/custom-filter-menu';
 export * from '@/widgets/partials/custom-editor';
 export * from '@/widgets/partials/custom-crud-group-buttons';
 export * from '@/widgets/partials/custom-pagination';
+export * from '@/widgets/partials/custom-voucher-submit';
+export * from '@/widgets/partials/cutom-bagde-notification';
